@@ -459,12 +459,12 @@ function getCountAndUserIds(votes) {
 //         });
 // })
 app.post("/vote", function (req, res) {
-    if(req.body.userId == null || req.body.userId == "" || req.body.userId == req.body.who){
+    if (req.body.userId == null || req.body.userId == "" || req.body.userId == req.body.who) {
         res.send("Du kan inte rösta på din egen låt!");
         return;
     }
     var documentId = req.body.userId;
-    
+
     db.collection("votes")
         .doc(documentId)
         .set({
@@ -544,7 +544,7 @@ app.post("/get_tracks", async function (req, res) {
         var track = doc.data();
         var totalLikes = 0;
         var users = [];
-        var addedBy = doc.id; 
+        var addedBy = doc.id;
         var display_name = doc._fieldsProto.display_name.stringValue;
 
         //var who= "";
@@ -584,15 +584,18 @@ app.post("/get_tracks", async function (req, res) {
 
 app.post("/update_playlist", function (req, res) {
     let playlistId = "6CiGXt6v60opLz0v45JI5i";
+    let loserPlaylistId = "4wBuklcIoGf4ZVXRPNzQ2r";
     let client_id = spotifyApiDetails.client_id;
     let client_secret = spotifyApiDetails.client_secret;
     let access_token = req.headers.authorization;
     let mostLikedSongs = [];
+    let allSongs = [];
     let mostLikedSong = [];
     let mostLikedSongName = [];
     let mostLikedSongId = [];
     let mostLikedSongArtist = [];
     let mostlikedSongCollection = [];
+    var errorCode = "";
     // var authOptions = {
     //   url: 'https://accounts.spotify.com/api/token',
     //   headers: {
@@ -624,9 +627,30 @@ app.post("/update_playlist", function (req, res) {
                     mostLikedSong.push("spotify:track:" + song.trackId);
                     mostLikedSongId.push(song.trackId);
                 }
+                if (song.trackId != null && song.trackId != "") {
+                    allSongs.push("spotify:track:" + song.trackId);
+                }
             }
+
             );
-            console.log(mostLikedSong);
+            console.log("allSongs: \n" + allSongs);
+            let loserOptions = {
+                url: 'https://api.spotify.com/v1/playlists/' + loserPlaylistId + '/tracks',
+                headers: { 'Authorization': access_token },
+                json: true,
+                body: {
+                    "uris": allSongs
+                }
+            };
+            request.post(loserOptions, function (error, response, body) {
+                if (!error && response.statusCode === 2001) {
+                    console.log("Loser playlist updated");
+                }
+                else {
+                    errorCode = error + "" + response.statusCode;
+                }
+            });
+            console.log("mostLikedSong: \n" + mostLikedSong);
             let options = {
                 url: 'https://api.spotify.com/v1/playlists/' + playlistId + '/tracks',
                 headers: { 'Authorization': access_token },
@@ -638,14 +662,14 @@ app.post("/update_playlist", function (req, res) {
             };
             request.post(options, function (error, response, body) {
                 if (!error && response.statusCode === 201) {
-                    //empty trackid from submitted songs collection
-                    db.collection("submitted-songs").get().then(function (querySnapshot) {
-                        querySnapshot.forEach(function (doc) {
-                            db.collection("submitted-songs").doc(doc.id).update({
-                                trackId: ""
+                        //empty trackid from submitted songs collection
+                        db.collection("submitted-songs").get().then(function (querySnapshot) {
+                            querySnapshot.forEach(function (doc) {
+                                db.collection("submitted-songs").doc(doc.id).update({
+                                    trackId: ""
+                                });
                             });
                         });
-                    });
 
                     return res.send("Playlist updated");
 
@@ -677,7 +701,8 @@ app.post("/update_playlist", function (req, res) {
                         json: true,
                         body: {
                             email: "linusri@kth.se, Lukas.elfving@gmail.com, frej.back@gmail.com, j.jagestedt@gmail.com",
-                            subject: "Fredagslaten",
+                            // email: "j.jagestedt@gmail.com",
+                            subject: "Fredagslåten",
                             message: mailMessage
 
                         }
@@ -698,7 +723,7 @@ app.post("/update_playlist", function (req, res) {
                 val.map((val) => {
                     val.delete();
                 })
-        
+
             });
 
 
