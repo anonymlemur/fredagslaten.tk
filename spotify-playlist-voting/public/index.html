@@ -50,7 +50,18 @@
         </div>
         <div id="selected-playlist-tracks"></div>
       </div>
+      <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 playlist-div">
+        <div class="thumbnail" id="playlistbox">
+          <iframe id="playlist" style="border-radius:12px"
+            src="https://open.spotify.com/embed/playlist/6CiGXt6v60opLz0v45JI5i?utm_source=generator" width="100%"
+            height="380" frameBorder="0" allowfullscreen=""
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+        </div>
+      </div>
+
     </div>
+  </div>
+  </div>
   </div>
 
   <script id="user-playlists-template" type="text/x-handlebars-template">
@@ -93,14 +104,7 @@
           {{/if}}
           {{/each}}
   
-            </div>
-            <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 playlist-div">
-              <div class="thumbnail" id="playlistbox">
-                <iframe id="playlist" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/6CiGXt6v60opLz0v45JI5i?utm_source=generator" width="100%" height="380" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-                </div>
-          </div>
-  
-        </div>
+            
   </script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.4.2/handlebars.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>

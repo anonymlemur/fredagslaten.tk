@@ -471,7 +471,8 @@ app.post("/vote", function (req, res) {
             userId: req.body.userId,
             trackId: req.body.trackId,
             like: req.body.like,
-            who: req.body.who
+            who: req.body.who,
+            displayName: req.body.displayName
         }).then(ref => {
             var votes = {};
 
@@ -727,18 +728,21 @@ app.post("/get_likes", async function (req, res) {
         var totalLikes = 0;
         var users = [];
         var addedBy = doc.id;
+        var displayNames = [];
         //var who= "";
 
         allLikes.forEach(function (like) {
             if (like.trackId == track.trackId) {
                 totalLikes++;
                 //who = like.who;
+                displayNames.push(like.displayName);
                 users.push(like.userId);
                 //addedBy = like.userId;
             }
         });
         track.likes = totalLikes;
         track.users = users;
+        track.displayNames = displayNames;
         track.addedBy = doc.id;
 
         //track.who = who;

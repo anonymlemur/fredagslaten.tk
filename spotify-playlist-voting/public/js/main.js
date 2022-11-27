@@ -8,11 +8,6 @@
         }
         return hashParams;
     }
-    //get_likes();
-    // var userPlaylistsSource = document.getElementById("user-playlists-template").innerHTML,
-    //     userPlaylistsTemplate = Handlebars.compile(userPlaylistsSource),
-    //     userPlaylistsPlaceholder = document.getElementById("user-playlists");
-
     var selectedPlaylistTracksSource = document.getElementById("selected-playlist-tracks-template").innerHTML,
         selectedPlaylistTracksTemplate = Handlebars.compile(selectedPlaylistTracksSource),
         selectedPlaylistTracksPlaceholder = document.getElementById("selected-playlist-tracks");
@@ -23,6 +18,7 @@
         error = params.error;
 
     var userId = "";
+    var displayName= "";
     var playlistId = "";
     var playlistName = "";
     var spotifyApiRoot = "https://api.spotify.com/v1";
@@ -32,9 +28,9 @@
     } else {
         $("#add-to-playlist").hide();
         if (access_token) {
-            //getPlaylistsFromSpotify();
-            getFredagsFromSpotify();
-            //get_likes();
+        	$("#selected-playlist-container").show();
+        	$("#add-to-playlist").show();
+		getFredagsFromSpotify();
 
         } else {
             $("#login").show();
@@ -51,7 +47,7 @@
             for (let item of data.items) {
                 let users = "";
                 if (item.users.length != 0) {
-                    users += `(${item.users})`;
+                    users += `(${item.displayNames})`;
                 }
                 else {
                     users += "inga röster";
@@ -61,11 +57,6 @@
         });
     }
     async function getFredagsFromSpotify() {
-        //$("#user-playlists").hide();
-        $("#selected-playlist-container").show();
-        $("#add-to-playlist").show();
-
-
         playlistId = "6CiGXt6v60opLz0v45JI5i";
         $.ajax({
             url: spotifyApiRoot + "/me",
@@ -75,7 +66,6 @@
             success: function (response) {
                 userId = response.id;
                 displayName = response.display_name;
-                console.log(response);
                 $("#login").hide();
                 $("#loggedin").show();
             },
@@ -85,7 +75,6 @@
                 window.location.href = "http://fredagslaten.tk";
                 alert("Du får inte tillgång till denna sida");
 
-                console.log(response);
             }
         });
         $.ajax({
@@ -111,7 +100,8 @@
             "userId": userId,
             "playlistId": playlistId,
             "like": like,
-            "who": who
+            "who": who,
+            "displayName": displayName 
         }
 
         $.ajax({
@@ -121,7 +111,6 @@
             contentType: "application/json"
         }).done(function (data) {
             if(data == "ok"){
-                console.log("ok");
             }
             else if(data == "Du kan inte rösta på din egen låt!")
             {
@@ -136,7 +125,6 @@
     $(document).on("click", ".add-to-playlist", function (e) {
         e.preventDefault();
         add_song(document.getElementById('track').value);
-        //getFredagsFromSpotify();
 
     });
     function add_song(id) {
@@ -153,9 +141,7 @@
             contentType: "application/json"
 
         }).done(function (response) {
-            console.log(response);
             alert(response.toString());
-            //document.getElementById('add-song-status').textContent = response.toString();
             getFredagsFromSpotify();
         });
 
