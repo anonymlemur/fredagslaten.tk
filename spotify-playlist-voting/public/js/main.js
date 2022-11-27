@@ -18,7 +18,7 @@
         error = params.error;
 
     var userId = "";
-    var displayName= "";
+    var displayName = "";
     var playlistId = "";
     var playlistName = "";
     var spotifyApiRoot = "https://api.spotify.com/v1";
@@ -28,9 +28,7 @@
     } else {
         $("#add-to-playlist").hide();
         if (access_token) {
-        	$("#selected-playlist-container").show();
-        	$("#add-to-playlist").show();
-		getFredagsFromSpotify();
+            getFredagsFromSpotify();
 
         } else {
             $("#login").show();
@@ -53,10 +51,23 @@
                     users += "inga röster";
                 }
                 $("#likes-" + item.trackId + "-" + item.addedBy).html(item.likes + "<br>" + users);
+                if (item.users.includes(userId)) {
+                    $("#" + item.trackId).css({ "background-color": "white", "color": "black" });
+                }
+                else {
+                    $("#" + item.trackId).css({ "background-color": "#002b628f", "color": "white" });
+
+                }
             }
         });
+
+
     }
     async function getFredagsFromSpotify() {
+        $("#login").hide();
+        $("#loading").show();
+        $("#selected-playlist-container").show();
+        $("#add-to-playlist").show();
         playlistId = "6CiGXt6v60opLz0v45JI5i";
         $.ajax({
             url: spotifyApiRoot + "/me",
@@ -66,7 +77,7 @@
             success: function (response) {
                 userId = response.id;
                 displayName = response.display_name;
-                $("#login").hide();
+                $("#loading").hide();
                 $("#loggedin").show();
             },
             error: function (response) {
@@ -101,7 +112,7 @@
             "playlistId": playlistId,
             "like": like,
             "who": who,
-            "displayName": displayName 
+            "displayName": displayName
         }
 
         $.ajax({
@@ -110,13 +121,12 @@
             data: JSON.stringify(data),
             contentType: "application/json"
         }).done(function (data) {
-            if(data == "ok"){
+            if (data == "ok") {
             }
-            else if(data == "Du kan inte rösta på din egen låt!")
-            {
+            else if (data == "Du kan inte rösta på din egen låt!") {
                 alert(data);
             }
-            else{
+            else {
                 alert("Något gick fel");
             };
 

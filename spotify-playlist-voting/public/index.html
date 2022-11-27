@@ -31,6 +31,16 @@
 
 
 <body>
+  <div id="loading" class="lds-roller">
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
   <div class="container-fluid">
     <div id="login">
       <a href="/login" class="btn btn-lg btn-green">Logga in med Spotify</a>
@@ -52,59 +62,61 @@
       </div>
       <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 playlist-div">
         <div class="thumbnail" id="playlistbox">
+          <h2 class="added-by">Fredagslåten 2 Electric boogaloo</h2>
           <iframe id="playlist" style="border-radius:12px"
             src="https://open.spotify.com/embed/playlist/6CiGXt6v60opLz0v45JI5i?utm_source=generator" width="100%"
             height="380" frameBorder="0" allowfullscreen=""
             allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+          <h2 class="added-by">Alla bidrag</h2>
+          <iframe id="playlist" style="border-radius:12px"
+            src="https://open.spotify.com/embed/playlist/4wBuklcIoGf4ZVXRPNzQ2r?utm_source=generator" width="100%"
+            height="380" frameBorder="0" allowfullscreen=""
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
         </div>
       </div>
+
 
     </div>
   </div>
   </div>
   </div>
 
-  <script id="user-playlists-template" type="text/x-handlebars-template">
-
-    </script>
+  <script id="user-playlists-template" type="text/x-handlebars-template"></script>
   <script id="selected-playlist-tracks-template" type="text/x-handlebars-template">
-        <div class="row">
-          {{#each items}}
-          {{#if trackId}}
-          <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-            <div class="thumbnail" id="{{addedBy}}">
-              <p>
-              <h2 class="added-by">{{display_name}}</h2>
-              <iframe style="border-radius:12px;box-shadow: 3px 3px hsl({{oppositeColorValue}}, 100%, 80%); "
-                src="https://open.spotify.com/embed/track/{{trackId}}" width="300" height="352" frameBorder="0"
-                allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                loading="lazy"></iframe>
-              <div class="caption">
-                <a href="#" id="{{trackId}}" class="btn-like btn btn-default">
-                  <span id="{{trackId}}" class="fa fa-thumbs-up" aria-hidden="true"></span>
-                </a>
-                </p>Antal röster: <span id="likes-{{trackId}}-{{addedBy}}"></span>
-              </div>
-            </div>
+    <div class="row">
+      {{#each items}}
+      {{#if trackId}}
+      <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+        <div class="thumbnail" id="{{addedBy}}">
+          <p>
+            <h2 class="added-by">{{display_name}}</h2>
+            <iframe style="border-radius:12px;box-shadow: 3px 3px hsl({{oppositeColorValue}}, 100%, 80%); "
+              src="https://open.spotify.com/embed/track/{{trackId}}" width="300" height="352" frameBorder="0"
+              allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              loading="lazy"></iframe>
+            <div class="caption">
+              <a href="#" id="{{trackId}}" class="btn-like btn btn-default">
+                <span id="{{trackId}}" class="fa fa-thumbs-up" aria-hidden="true"></span>
+              </a>
+          </p>Antal röster: <span id="likes-{{trackId}}-{{addedBy}}"></span>
+        </div>
+      </div>
+    </div>
+    {{else}}
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+      <div class="thumbnail" id="{{addedBy}}">
+        <p>
+          <h2 class="added-by">{{display_name}}</h2>
+          <div class="box {{addedBy}}" style="background: hsl({{colorValue}} , 100%, 80%);box-shadow: 3px 3px hsl({{oppositeColorValue}}, 100%, 80%);">
+            <span class="boxText" style="color: hsl({{colorValue}} , 100%, 50%);text-shadow: 1px 1px hsl({{colorValue}}  , 100%, 80%);">
+              {{display_name}} har inte lagt till en fredagslåt</span>
           </div>
-          {{else}}
-          <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-            <div class="thumbnail" id="{{addedBy}}">
-              <p>
-              <h2 class="added-by">{{display_name}}</h2>
-              <div class="box {{addedBy}}"
-                style="background: hsl({{colorValue}} , 100%, 80%);box-shadow: 3px 3px hsl({{oppositeColorValue}}, 100%, 80%);">
-                <span class="boxText"
-                  style="color: hsl({{colorValue}} , 100%, 50%);text-shadow: 1px 1px hsl({{colorValue}}  , 100%, 80%);">
-                  {{display_name}} har inte lagt till en fredagslåt</span></div>
-              <div class="deadspace">
-              </div>
-            </div>
+          <div class="deadspace">
           </div>
-          {{/if}}
-          {{/each}}
-  
-            
+      </div>
+    </div>
+    {{/if}}
+    {{/each}}
   </script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.4.2/handlebars.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
