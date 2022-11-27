@@ -257,16 +257,23 @@ h2 {
 
 .btn-like {
   border-radius: 12px;
+
 }
 
 .btn-green {
   color: #fff;
-  background-color: #2ebd59;
+  background-color: #89d02d;
 }
 
 .btn-green:hover {
-  color: #fff;
-  background-color: #1ed760
+  color: #000;
+  filter: invert(180%);
+}
+
+.btn-like:hover {
+  color: rgb(92, 143, 119);
+  box-shadow: 0 0 0 1px rgb(92, 143, 119);
+
 }
 
 #login {
@@ -282,12 +289,13 @@ a.text-green {
 }
 
 .add-to-playlist {
-  /* Center horizontally*/
+
   text-align: center;
   border-radius: 10px;
   background-color: #ffe29e8a;
   position: sticky;
   height: 36px;
+  margin-left: 5px;
 
 }
 
