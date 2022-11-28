@@ -422,48 +422,26 @@ function getCountAndUserIds(votes) {
     return votes.length + " (" + usernames + ")";
 }
 
-// app.post("/vote", function (req, res) {
-//     var documentId = req.body.userId + "-" + req.body.trackId;
-//     db.collection("playlist-" + req.body.playlistId)
-//         .doc(documentId)
-//         .set({
-//             userId: req.body.userId,
-//             trackId: req.body.trackId,
-//             like: req.body.like
-//         }).then(ref => {
-//             var votes = {};
 
-//             db.collection("playlist-" + req.body.playlistId)
-//                 .where("trackId", "==", req.body.trackId).get()
-//                 .then(snapshot => {
-//                     if (!snapshot.empty) {
-//                         var likes = [];
-//                         var dislikes = [];
-//                         snapshot.forEach(doc => {
-//                             if (doc.data().like) {
-//                                 likes.push(doc.data());
-//                             } else {
-//                                 dislikes.push(doc.data());
-//                             }
-//                         });
-
-//                         votes.likes = getCountAndUserIds(likes);
-//                         votes.dislikes = getCountAndUserIds(dislikes);
-//                         res.send(votes);
-//                     }
-//                 })
-//                 .catch(err => {
-//                     console.log("Error getting documents", err);
-//                     res.send(votes);
-//                 });
-//         });
-// })
 app.post("/vote", function (req, res) {
     if (req.body.userId == null || req.body.userId == "" || req.body.userId == req.body.who) {
         res.send("Du kan inte rösta på din egen låt!");
         return;
     }
     var documentId = req.body.userId;
+    var docRef = db.collection("votes").doc(documentId);
+    docRef.get().then(doc => {
+        if (doc.exists) {
+            if (doc.data().trackId == req.body.trackId) {
+                db.collection("votes").doc(documentId).delete();
+                res.send("Röst borttagen");
+                return;
+            }
+        }
+        else { }
+    }).catch((error) => {
+        console.log("Error getting document:", error);
+    });
 
     db.collection("votes")
         .doc(documentId)
@@ -480,24 +458,11 @@ app.post("/vote", function (req, res) {
                 .where("trackId", "==", req.body.trackId).get()
                 .then(snapshot => {
                     if (!snapshot.empty) {
-                        var likes = [];
-                        var dislikes = [];
-                        snapshot.forEach(doc => {
-                            if (doc.data().like) {
-                                likes.push(doc.data());
-                            } else {
-                                dislikes.push(doc.data());
-                            }
-                        });
-
-                        votes.likes = getCountAndUserIds(likes);
-                        votes.dislikes = getCountAndUserIds(dislikes);
                         res.send("ok");
                     }
                 })
                 .catch(err => {
-                    console.log("Error getting documents", err);
-                    res.send(votes);
+                    res.send("error");
                 });
         });
 })
@@ -662,14 +627,14 @@ app.post("/update_playlist", function (req, res) {
             };
             request.post(options, function (error, response, body) {
                 if (!error && response.statusCode === 201) {
-                        //empty trackid from submitted songs collection
-                        db.collection("submitted-songs").get().then(function (querySnapshot) {
-                            querySnapshot.forEach(function (doc) {
-                                db.collection("submitted-songs").doc(doc.id).update({
-                                    trackId: ""
-                                });
+                    //empty trackid from submitted songs collection
+                    db.collection("submitted-songs").get().then(function (querySnapshot) {
+                        querySnapshot.forEach(function (doc) {
+                            db.collection("submitted-songs").doc(doc.id).update({
+                                trackId: ""
                             });
                         });
+                    });
 
                     return res.send("Playlist updated");
 

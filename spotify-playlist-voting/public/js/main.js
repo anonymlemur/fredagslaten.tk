@@ -102,7 +102,7 @@
     $(document).on("click", ".btn-like", function (e) {
         e.preventDefault();
         vote(e.target.id, e.target.parentNode.parentNode.id + e.target.parentNode.parentNode.parentNode.id, true);
-        get_likes();
+        //get_likes();
     });
     async function vote(id, who, like) {
         let trackId = id;
@@ -122,9 +122,13 @@
             contentType: "application/json"
         }).done(function (data) {
             if (data == "ok") {
+                get_likes();
             }
             else if (data == "Du kan inte rösta på din egen låt!") {
                 alert(data);
+            }
+            else if (data == "Röst borttagen") {
+                get_likes();
             }
             else {
                 alert("Något gick fel");
