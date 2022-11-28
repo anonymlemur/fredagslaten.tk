@@ -437,34 +437,62 @@ app.post("/vote", function (req, res) {
                 res.send("Röst borttagen");
                 return;
             }
+            else {
+                db.collection("votes")
+                    .doc(documentId)
+                    .set({
+                        userId: req.body.userId,
+                        trackId: req.body.trackId,
+                        like: req.body.like,
+                        who: req.body.who,
+                        displayName: req.body.displayName
+                    }).then(ref => {
+                        var votes = {};
+
+                        db.collection("votes")
+                            .where("trackId", "==", req.body.trackId).get()
+                            .then(snapshot => {
+                                if (!snapshot.empty) {
+                                    res.send("ok");
+                                    return;
+                                }
+                            })
+                            .catch(err => {
+                                res.send("error");
+                            });
+                    });
+            }
         }
-        else { }
+        else {
+            db.collection("votes")
+                .doc(documentId)
+                .set({
+                    userId: req.body.userId,
+                    trackId: req.body.trackId,
+                    like: req.body.like,
+                    who: req.body.who,
+                    displayName: req.body.displayName
+                }).then(ref => {
+                    var votes = {};
+
+                    db.collection("votes")
+                        .where("trackId", "==", req.body.trackId).get()
+                        .then(snapshot => {
+                            if (!snapshot.empty) {
+                                res.send("ok");
+                                return;
+                            }
+                        })
+                        .catch(err => {
+                            res.send("error");
+                        });
+                });
+        }
     }).catch((error) => {
         console.log("Error getting document:", error);
     });
 
-    db.collection("votes")
-        .doc(documentId)
-        .set({
-            userId: req.body.userId,
-            trackId: req.body.trackId,
-            like: req.body.like,
-            who: req.body.who,
-            displayName: req.body.displayName
-        }).then(ref => {
-            var votes = {};
 
-            db.collection("votes")
-                .where("trackId", "==", req.body.trackId).get()
-                .then(snapshot => {
-                    if (!snapshot.empty) {
-                        res.send("ok");
-                    }
-                })
-                .catch(err => {
-                    res.send("error");
-                });
-        });
 })
 app.post("/add_song", function (req, res) {
     var documentId = req.body.userId;
