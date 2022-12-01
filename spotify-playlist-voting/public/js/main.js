@@ -52,10 +52,10 @@
                 }
                 $("#likes-" + item.trackId + "-" + item.addedBy).html(item.likes + "<br>" + users);
                 if (item.users.includes(userId)) {
-                    $("#" + item.trackId).css({ "background-color": "white", "color": "black" });
+                    $("#" + item.trackId).css({ "background": "none", "color": "rgb(201, 249, 197)" });
                 }
                 else {
-                    $("#" + item.trackId).css({ "background-color": "#002b628f", "color": "white" });
+                    $("#" + item.trackId).css({ "background": "none", "color": "rgba(249, 197, 209, 1)" });
 
                 }
             }
