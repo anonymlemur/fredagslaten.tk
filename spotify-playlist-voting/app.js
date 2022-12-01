@@ -24,6 +24,15 @@ const transporter = nodemailer.createTransport({
         pass: emailDetails.pass
     }
 });
+const MINUTE = 60000
+const DAY = 86400000
+const WEEK = 604800000 // = 7 * 24 * 60 * 60 * 1000 = 7 days in ms
+
+/**
+ * Get the difference in milliseconds between the timezone offsets of 2 dates
+ */
+const tzDiff = (first, second) => (first.getTimezoneOffset() - second.getTimezoneOffset()) * MINUTE
+
 
 
 const { readFile } = require("fs");
@@ -576,6 +585,21 @@ app.post("/get_tracks", async function (req, res) {
 });
 
 app.post("/update_playlist", function (req, res) {
+    function weekNumber(date = new Date()) {
+        // day 0 is monday
+        const day = (date.getDay() + 6) % 7
+        // get thursday of present week
+        const thursday = new Date(date)
+        thursday.setDate(date.getDate() - day + 3)
+        // set 1st january first
+        const firstThursday = new Date(thursday.getFullYear(), 0, 1)
+        // if Jan 1st is not a thursday...
+        if (firstThursday.getDay() !== 4) {
+            firstThursday.setMonth(0, 1 + (11 /* 4 + 7 */ - firstThursday.getDay()) % 7)
+        }
+        const weekNumber = 1 + Math.floor((thursday - firstThursday + tzDiff(firstThursday, thursday)) / WEEK)
+        return weekNumber
+    }
     let playlistId = "6CiGXt6v60opLz0v45JI5i";
     let loserPlaylistId = "4wBuklcIoGf4ZVXRPNzQ2r";
     let client_id = spotifyApiDetails.client_id;
@@ -695,7 +719,7 @@ app.post("/update_playlist", function (req, res) {
                         body: {
                             email: "linusri@kth.se, Lukas.elfving@gmail.com, frej.back@gmail.com, j.jagestedt@gmail.com",
                             // email: "j.jagestedt@gmail.com",
-                            subject: "Fredagslåten",
+                            subject: "Fredagslåten vecka " + weekNumber(),
                             message: mailMessage
 
                         }
