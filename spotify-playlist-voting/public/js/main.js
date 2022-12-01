@@ -93,6 +93,11 @@
             url: "/get_tracks",
             contentType: "application/json"
         }).done(function (data) {
+            var i = 0;
+            data.items.forEach(function (item) {
+                i++;
+                item.index = i;
+            });
             selectedPlaylistTracksPlaceholder.innerHTML = selectedPlaylistTracksTemplate(data);
         });
         setTimeout(() => { get_likes(); }, 50);
