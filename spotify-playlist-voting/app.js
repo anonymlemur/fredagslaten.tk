@@ -552,6 +552,8 @@ app.post("/add_song", function (req, res) {
 });
 app.post("/get_tracks", async function (req, res) {
     //var documentId = req.body.userId;
+    var songsSubmitted = 0;
+    var haveEveryoneSubmitted = false;
     const snapshot = await db.collection('submitted-songs').get();
     const snapshotLikes = await db.collection('votes').get();
     var allLikes = [];
@@ -584,21 +586,21 @@ app.post("/get_tracks", async function (req, res) {
         track.users = users;
         track.addedBy = doc.id;
         track.display_name = display_name;
+        if(track.trackId != null && track.trackId != ""){
+            songsSubmitted++;
+        }
         //track.who = who;
         allTracks.push(track);
     });
+    if(songsSubmitted == 4){
+        haveEveryoneSubmitted = true;
+    }
+    allTracks.forEach(function (track) {
+        track.haveEveryoneSubmitted = haveEveryoneSubmitted;
+    });
 
 
-
-    // db.collection("submitted-songs")
-    // .onSnapshot((snapshot) => {
-    //   const data = snapshot.docs.map((doc) => ({
-    //     id: doc.id,
-    //     ...doc.data(),
-    //   }));
-    //   console.log(data);
-    // });
-    //return res.send({ items: snapshot.docs }, { likes: allLikes });
+    
     return res.send({ items: allTracks });
 
 });

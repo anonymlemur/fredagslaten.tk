@@ -63,21 +63,25 @@
           </div>
            {{#each items}}
            {{#if trackId}}
-             <div class="song box" id="song-{{index}}">
-               <div class="thumbnail" id="{{addedBy}}">
-                 <h2 class="added-by">{{display_name}}</h2>
-                 <iframe style="border-radius:5px; "
-                   src="https://open.spotify.com/embed/track/{{trackId}}" width="300px" height="352" frameBorder="0"
-                   allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                   loading="lazy"></iframe>
-                 <div class="caption">
-                   <a href="#" id="{{trackId}}" class="btn-like btn btn-default">
-                     <span id="{{trackId}}" class="fa fa-thumbs-up" aria-hidden="true"></span>
-                   </a>
-                   </p>Antal röster: <span id="likes-{{trackId}}-{{addedBy}}"></span>
-                 </div>
-               </div>
-             </div>
+            <div class="song box" id="song-{{index}}">
+              <div class="thumbnail" id="{{addedBy}}">
+                <h2 class="added-by">{{display_name}}</h2>
+                <iframe style="border-radius:5px; " src="https://open.spotify.com/embed/track/{{trackId}}" width="300px"
+                  height="352" frameBorder="0" allowfullscreen=""
+                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                {{#if haveEveryoneSubmitted}}
+                <div class="caption">
+                  <a href="#" id="{{trackId}}" class="btn-like btn btn-default">
+                    <span id="{{trackId}}" class="fa fa-thumbs-up" aria-hidden="true"></span>
+                  </a>
+                  </p>Antal röster: <span id="likes-{{trackId}}-{{addedBy}}"></span>
+                </div>
+                {{else}}
+                <div class="deadspace-iframe">
+                </div>
+                {{/if}}
+              </div>
+            </div>
          {{else}}
          <div class="song box" id="song-{{index}}">
            <div class="thumbnail" id="{{addedBy}}">
