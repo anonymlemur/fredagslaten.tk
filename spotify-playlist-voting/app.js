@@ -35,6 +35,8 @@ const tzDiff = (first, second) => (first.getTimezoneOffset() - second.getTimezon
 
 
 
+
+
 const { readFile } = require("fs");
 
 var redirect_uri = "https://fredagslaten.tk/callback";
@@ -508,25 +510,42 @@ app.post("/add_song", function (req, res) {
     var trackIdIn = req.body.trackId;
     if (trackIdIn.startsWith("https://open.spotify.com/track/")) {
         trackIdIn = trackIdIn.substring(31);
-        if (trackIdIn.indexOf("?") > -1) {
-            trackIdIn = trackIdIn.substring(0, trackIdIn.indexOf("?"));
+    }
+    if (trackIdIn.indexOf("?") > -1) {
+        trackIdIn = trackIdIn.substring(0, trackIdIn.indexOf("?"));
+    }
+    if (trackIdIn.startsWith("spotify:track:")) {
+        trackIdIn = trackIdIn.substring(14);
+    }
+    var options = { method: "GET", url: "https://api.spotify.com/v1/tracks/" + trackIdIn, headers: { Authorization: "Bearer " + req.body.accessToken } };
+    request(options, function (error, response, body) {
+        if (error) throw new Error(error);
+        if (response.statusCode != 200) {
+            return res.send("Låten är inte giltig");
+
+        }
+        else {
+            db.collection("submitted-songs")
+                .doc(documentId)
+                .update({
+                    trackId: trackIdIn,
+                }).catch(err => {
+                    stringReturn = "User not authorized";
+                    console.log("User " + documentId + " not found",);
+
+                }).then(ref => {
+                    if (!ref) {
+                        return res.send("Inte medlem i SlurpGang");
+                    }
+                    return res.send("Sång tillagd");
+                });
         }
     }
+    );
 
-    db.collection("submitted-songs")
-        .doc(documentId)
-        .update({
-            trackId: trackIdIn,
-        }).catch(err => {
-            stringReturn = "User not authorized";
-            console.log("User " + documentId + " not found",);
 
-        }).then(ref => {
-            if (!ref) {
-                return res.send("Inte medlem i SlurpGang");
-            }
-            return res.send("Sång tillagd");
-        });
+
+
 
 
 

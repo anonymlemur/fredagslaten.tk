@@ -31,8 +31,10 @@
             getFredagsFromSpotify();
 
         } else {
+            $("#loading").show();
             $("#login").show();
             $("#loggedin").hide();
+            $("#loading").hide();
         }
     }
     async function get_likes() {
@@ -43,19 +45,23 @@
             contentType: "application/json"
         }).done(function (data) {
             for (let item of data.items) {
-                let users = "";
-                if (item.users.length != 0) {
-                    users += `(${item.displayNames})`;
-                }
-                else {
-                    users += "inga röster";
-                }
-                $("#likes-" + item.trackId + "-" + item.addedBy).html(item.likes + "<br>" + users);
-                if (item.users.includes(userId)) {
-                    $("#" + item.trackId).css({ "background": "none", "color": "rgb(201, 249, 197)" });
-                }
-                else {
-                    $("#" + item.trackId).css({ "background": "none", "color": "rgba(249, 197, 209, 1)" });
+                if (item.trackId) {
+                    let users = "";
+                    if (item.users.length != 0) {
+                        users += `(${item.displayNames})`;
+                    }
+                    else {
+                        users += "inga röster";
+                    }
+                    $("#likes-" + item.trackId + "-" + item.addedBy).html(item.likes + "<br>" + users);
+
+                    if (item.users.includes(userId)) {
+                        $("#" + item.trackId).css({ "background": "none", "color": "rgb(201, 249, 197)" });
+                    }
+                    else {
+                        $("#" + item.trackId).css({ "background": "none", "color": "rgba(249, 197, 209, 1)" });
+
+                    }
 
                 }
             }
@@ -149,7 +155,8 @@
         var trackId = id;
         var data = {
             "trackId": trackId,
-            "userId": userId
+            "userId": userId,
+            "accessToken": access_token
         }
 
         $.ajax({
@@ -159,8 +166,9 @@
             contentType: "application/json"
 
         }).done(function (response) {
-            alert(response.toString());
             getFredagsFromSpotify();
+            alert(response.toString());
+
         });
 
     }

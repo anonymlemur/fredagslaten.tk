@@ -4,6 +4,8 @@
 <head>
   <title>Fredagslåten</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#d7d7d7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#2d2d2d" media="(prefers-color-scheme: dark)">
   <link rel="shortcut icon" href="images/favicon.png">
   <link rel="icon" href="images/favicon.ico" type="image/x-icon">
   <meta name="description" content="Lägg till- och rösta på veckans
@@ -27,7 +29,8 @@
 </head>
 
 <body>
-  <div id="loading" class="lds-roller">
+  <div id="loading" class="lds-grid">
+    <div></div>
     <div></div>
     <div></div>
     <div></div>
@@ -79,7 +82,7 @@
          <div class="song box" id="song-{{index}}">
            <div class="thumbnail" id="{{addedBy}}">
              <h2 class="added-by">{{display_name}}</h2>
-             <div class="box {{addedBy}}"
+             <div class="box  boxTom {{addedBy}}"
                style="background: hsl({{colorValue}} , 100%, 80%);">
                <span class="boxText"
                  style="color: hsl({{colorValue}} , 100%, 50%);text-shadow: 1px 1px hsl({{colorValue}}  , 100%, 80%);">
