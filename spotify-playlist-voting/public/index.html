@@ -67,7 +67,7 @@
               <div class="thumbnail" id="{{addedBy}}">
                 <h2 class="added-by">{{display_name}}</h2>
                 <iframe style="border-radius:5px; " src="https://open.spotify.com/embed/track/{{trackId}}" width="300px"
-                  height="352" frameBorder="0" allowfullscreen=""
+                  height="352" frameBorder="0" allowfullscreen="" id="song-{{trackId}}-{{addedBy}}"
                   allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
                 {{#if haveEveryoneSubmitted}}
                 <div class="caption">

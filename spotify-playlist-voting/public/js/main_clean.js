@@ -22,7 +22,11 @@
     var playlistId = "";
     var playlistName = "";
     var spotifyApiRoot = "https://api.spotify.com/v1";
-
+    //run get_likes dynamically
+    setInterval(function () {
+        get_likes();
+    }, 1000);
+    
     if (error) {
         alert("There was an error during the authentication");
     } else {

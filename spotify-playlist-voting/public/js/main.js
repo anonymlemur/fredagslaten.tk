@@ -1,1 +1,192 @@
-function _0x3d4b(_0x4314c2,_0x35bd9a){var _0x545c81=_0x545c();return _0x3d4b=function(_0x3d4b48,_0x171e21){_0x3d4b48=_0x3d4b48-0x188;var _0x36601b=_0x545c81[_0x3d4b48];return _0x36601b;},_0x3d4b(_0x4314c2,_0x35bd9a);}(function(_0x5972df,_0x1b3b15){var _0x4ae404=_0x3d4b,_0x56bd10=_0x5972df();while(!![]){try{var _0x35876c=-parseInt(_0x4ae404(0x1c9))/0x1*(-parseInt(_0x4ae404(0x1a7))/0x2)+-parseInt(_0x4ae404(0x1c7))/0x3*(parseInt(_0x4ae404(0x1c3))/0x4)+parseInt(_0x4ae404(0x1af))/0x5*(parseInt(_0x4ae404(0x18b))/0x6)+parseInt(_0x4ae404(0x18a))/0x7*(parseInt(_0x4ae404(0x1c5))/0x8)+parseInt(_0x4ae404(0x1ad))/0x9+-parseInt(_0x4ae404(0x1c2))/0xa+-parseInt(_0x4ae404(0x1bb))/0xb*(parseInt(_0x4ae404(0x1b1))/0xc);if(_0x35876c===_0x1b3b15)break;else _0x56bd10['push'](_0x56bd10['shift']());}catch(_0x4b5d4f){_0x56bd10['push'](_0x56bd10['shift']());}}}(_0x545c,0xda9ce),(function(){var _0xeba199=_0x3d4b;function _0x12a205(){var _0x239729=_0x3d4b,_0x2674de={},_0x4c47c8,_0x920306=/([^&;=]+)=?([^&;]*)/g,_0x21afe7=window[_0x239729(0x1b6)][_0x239729(0x1b4)][_0x239729(0x1ac)](0x1);while(_0x4c47c8=_0x920306['exec'](_0x21afe7)){_0x2674de[_0x4c47c8[0x1]]=decodeURIComponent(_0x4c47c8[0x2]);}return _0x2674de;}var _0x13a614=document[_0xeba199(0x1ce)](_0xeba199(0x198))['innerHTML'],_0x3d8931=Handlebars[_0xeba199(0x196)](_0x13a614),_0x3e69cb=document[_0xeba199(0x1ce)]('selected-playlist-tracks'),_0x5d27bf=_0x12a205(),_0x20f215=_0x5d27bf[_0xeba199(0x1bf)],_0x3abfa7=_0x5d27bf[_0xeba199(0x1cf)],_0x1f1266='',_0x248ee1='',_0x2890b9='',_0x224236='',_0x1f7dd8=_0xeba199(0x19c);_0x3abfa7?alert(_0xeba199(0x1bd)):($(_0xeba199(0x1b8))[_0xeba199(0x195)](),_0x20f215?_0x42e8cb():($(_0xeba199(0x1ab))[_0xeba199(0x1a0)](),$(_0xeba199(0x197))['show'](),$(_0xeba199(0x1a9))[_0xeba199(0x195)](),$(_0xeba199(0x1ab))[_0xeba199(0x195)]()));async function _0x5e58df(){var _0x336026=_0xeba199;$[_0x336026(0x1a8)]({'type':'POST','url':_0x336026(0x189),'contentType':_0x336026(0x191)})[_0x336026(0x192)](function(_0x370535){var _0x5c40a8=_0x336026;for(let _0x11d09e of _0x370535[_0x5c40a8(0x1c4)]){if(_0x11d09e[_0x5c40a8(0x1cb)]){let _0x3f5eb8='';_0x11d09e['users'][_0x5c40a8(0x1b2)]!=0x0?_0x3f5eb8+='('+_0x11d09e[_0x5c40a8(0x1c6)]+')':_0x3f5eb8+=_0x5c40a8(0x1cc),$(_0x5c40a8(0x188)+_0x11d09e[_0x5c40a8(0x1cb)]+'-'+_0x11d09e[_0x5c40a8(0x18e)])[_0x5c40a8(0x1cd)](_0x11d09e[_0x5c40a8(0x19a)]+_0x5c40a8(0x1c8)+_0x3f5eb8),_0x11d09e[_0x5c40a8(0x18f)][_0x5c40a8(0x199)](_0x1f1266)?$('#'+_0x11d09e[_0x5c40a8(0x1cb)])[_0x5c40a8(0x1a5)]({'background':'none','color':'rgb(201,\x20249,\x20197)'}):$('#'+_0x11d09e[_0x5c40a8(0x1cb)])[_0x5c40a8(0x1a5)]({'background':_0x5c40a8(0x18c),'color':_0x5c40a8(0x1a6)});}}});}async function _0x42e8cb(){var _0x1e23cc=_0xeba199;$(_0x1e23cc(0x197))[_0x1e23cc(0x195)](),$(_0x1e23cc(0x1ab))[_0x1e23cc(0x1a0)](),$(_0x1e23cc(0x19b))['show'](),$(_0x1e23cc(0x1b8))[_0x1e23cc(0x1a0)](),_0x2890b9=_0x1e23cc(0x1b3),$[_0x1e23cc(0x1a8)]({'url':_0x1f7dd8+_0x1e23cc(0x1b5),'headers':{'Authorization':_0x1e23cc(0x18d)+_0x20f215},'success':function(_0x193afa){var _0xf6d095=_0x1e23cc;_0x1f1266=_0x193afa['id'],_0x248ee1=_0x193afa[_0xf6d095(0x1ca)],$('#loading')[_0xf6d095(0x195)](),$('#loggedin')[_0xf6d095(0x1a0)]();},'error':function(_0x1271ae){var _0x25d911=_0x1e23cc;$('#login')[_0x25d911(0x1a0)](),$(_0x25d911(0x1a9))['hide'](),window['location'][_0x25d911(0x1c0)]=_0x25d911(0x1a2),alert(_0x25d911(0x1b9));}}),$[_0x1e23cc(0x1a8)]({'type':_0x1e23cc(0x1bc),'url':_0x1e23cc(0x190),'contentType':_0x1e23cc(0x191)})['done'](function(_0x4ba21a){var _0x16a69e=_0x1e23cc,_0x3dcb00=0x0;_0x4ba21a[_0x16a69e(0x1c4)][_0x16a69e(0x1aa)](function(_0x31a621){var _0x4f206d=_0x16a69e;_0x3dcb00++,_0x31a621[_0x4f206d(0x193)]=_0x3dcb00;}),_0x3e69cb[_0x16a69e(0x1ae)]=_0x3d8931(_0x4ba21a);}),setTimeout(()=>{_0x5e58df();},0x32);}$(document)['on'](_0xeba199(0x19f),'.btn-like',function(_0x5ac679){var _0x54e751=_0xeba199;_0x5ac679[_0x54e751(0x1be)](),_0x3fab10(_0x5ac679[_0x54e751(0x1a3)]['id'],_0x5ac679['target'][_0x54e751(0x1b7)][_0x54e751(0x1b7)]['id']+_0x5ac679['target']['parentNode']['parentNode'][_0x54e751(0x1b7)]['id'],!![]);});async function _0x3fab10(_0x1189f2,_0x9369c5,_0x1fac1e){var _0x37c3e9=_0xeba199;let _0xd0c5b=_0x1189f2,_0x369e15={'trackId':_0xd0c5b,'userId':_0x1f1266,'playlistId':_0x2890b9,'like':_0x1fac1e,'who':_0x9369c5,'displayName':_0x248ee1};$[_0x37c3e9(0x1a8)]({'type':_0x37c3e9(0x1bc),'url':_0x37c3e9(0x1a1),'data':JSON[_0x37c3e9(0x194)](_0x369e15),'contentType':_0x37c3e9(0x191)})[_0x37c3e9(0x192)](function(_0x664b31){var _0x206507=_0x37c3e9;if(_0x664b31=='ok')_0x5e58df();else{if(_0x664b31=='Du\x20kan\x20inte\x20rösta\x20på\x20din\x20egen\x20låt!')alert(_0x664b31);else _0x664b31=='Röst\x20borttagen'?_0x5e58df():alert(_0x206507(0x19d));};});}$(document)['on'](_0xeba199(0x19f),_0xeba199(0x1a4),function(_0x155b16){var _0x218159=_0xeba199;_0x155b16[_0x218159(0x1be)](),_0x293cd7(document[_0x218159(0x1ce)](_0x218159(0x19e))[_0x218159(0x1ba)]);});function _0x293cd7(_0x431234){var _0x4c8408=_0xeba199,_0x56b77f=_0x431234,_0x5c7aef={'trackId':_0x56b77f,'userId':_0x1f1266,'accessToken':_0x20f215};$[_0x4c8408(0x1a8)]({'type':'POST','url':_0x4c8408(0x1b0),'data':JSON[_0x4c8408(0x194)](_0x5c7aef),'contentType':_0x4c8408(0x191)})[_0x4c8408(0x192)](function(_0x347f45){var _0x45d3cb=_0x4c8408;_0x42e8cb(),alert(_0x347f45[_0x45d3cb(0x1c1)]());});}}()));function _0x545c(){var _0x2c5161=['addedBy','users','/get_tracks','application/json','done','index','stringify','hide','compile','#login','selected-playlist-tracks-template','includes','likes','#selected-playlist-container','https://api.spotify.com/v1','Något\x20gick\x20fel','track','click','show','/vote','http://fredagslaten.tk','target','.add-to-playlist','css','rgba(249,\x20197,\x20209,\x201)','4eevOXo','ajax','#loggedin','forEach','#loading','substring','11683611azXbSG','innerHTML','5UTfoJz','/add_song','36auzacc','length','6CiGXt6v60opLz0v45JI5i','hash','/me','location','parentNode','#add-to-playlist','Du\x20får\x20inte\x20tillgång\x20till\x20denna\x20sida','value','3179836cXtDbX','POST','There\x20was\x20an\x20error\x20during\x20the\x20authentication','preventDefault','access_token','href','toString','4243650rswZxi','1152utPgof','items','8pkdQhy','displayNames','2427lSDReP','<br>','190109fXhQRa','display_name','trackId','inga\x20röster','html','getElementById','error','#likes-','/get_likes','3574543FLAQKk','1385862fqZpzC','none','Bearer\x20'];_0x545c=function(){return _0x2c5161;};return _0x545c();}
+(function () {
+    function getHashParams() {
+        var hashParams = {};
+        var e, r = /([^&;=]+)=?([^&;]*)/g,
+            q = window.location.hash.substring(1);
+        while (e = r.exec(q)) {
+            hashParams[e[1]] = decodeURIComponent(e[2]);
+        }
+        return hashParams;
+    }
+    var selectedPlaylistTracksSource = document.getElementById("selected-playlist-tracks-template").innerHTML,
+        selectedPlaylistTracksTemplate = Handlebars.compile(selectedPlaylistTracksSource),
+        selectedPlaylistTracksPlaceholder = document.getElementById("selected-playlist-tracks");
+
+    var params = getHashParams();
+
+    var access_token = params.access_token,
+        error = params.error;
+
+    var userId = "";
+    var displayName = "";
+    var playlistId = "";
+    var playlistName = "";
+    var spotifyApiRoot = "https://api.spotify.com/v1";
+
+
+    if (error) {
+        alert("There was an error during the authentication");
+    } else {
+        $("#add-to-playlist").hide();
+        if (access_token) {
+            getFredagsFromSpotify();
+
+        } else {
+            $("#loading").show();
+            $("#login").show();
+            $("#loggedin").hide();
+            $("#loading").hide();
+        }
+    }
+    function refresh() {
+        get_tracks();
+        get_likes();
+        setTimeout(refresh, 5000);
+
+    }
+
+    async function get_likes() {
+
+        $.ajax({
+            type: "POST",
+            url: "/get_likes",
+            contentType: "application/json"
+        }).done(function (data) {
+            for (let item of data.items) {
+                if (item.trackId) {
+                    let users = "";
+                    if (item.users.length != 0) {
+                        users += `(${item.displayNames})`;
+                    }
+                    else {
+                        users += "inga röster";
+                    }
+                    $("#likes-" + item.trackId + "-" + item.addedBy).html(item.likes + "<br>" + users);
+
+                    if (item.users.includes(userId)) {
+                        $("#" + item.trackId).css({ "background": "none", "color": "rgb(201, 249, 197)" });
+                    }
+                    else {
+                        $("#" + item.trackId).css({ "background": "none", "color": "rgba(249, 197, 209, 1)" });
+
+                    }
+
+                }
+            }
+        });
+
+
+    }
+    async function getFredagsFromSpotify() {
+        $("#login").hide();
+        $("#loading").show();
+        $("#selected-playlist-container").show();
+        $("#add-to-playlist").show();
+        playlistId = "6CiGXt6v60opLz0v45JI5i";
+        $.ajax({
+            url: spotifyApiRoot + "/me",
+            headers: {
+                "Authorization": "Bearer " + access_token
+            },
+            success: function (response) {
+                userId = response.id;
+                displayName = response.display_name;
+                $("#loading").hide();
+                $("#loggedin").show();
+            },
+            error: function (response) {
+                $("#login").show();
+                $("#loggedin").hide();
+                window.location.href = "http://fredagslaten.tk";
+                alert("Du får inte tillgång till denna sida");
+
+            }
+        });
+        get_tracks();
+        refresh();
+    }
+    function get_tracks(first) {
+        $.ajax({
+            type: "POST",
+            url: "/get_tracks",
+            contentType: "application/json"
+        }).done(function (data) {
+            var i = 0;
+            var updateData = false;
+            data.items.forEach(function (item) {
+                i++;
+                item.index = i;
+                if (((item.trackId == null || item.trackId == "")  && document.getElementsByClassName('box boxTom ' + item.addedBy).length == 0) || (item.trackId != "" && (!document.getElementById('song-' + item.trackId + "-" + item.addedBy))) ) {
+                    updateData = true;
+                }
+            });
+            if (updateData || first) {
+                selectedPlaylistTracksPlaceholder.innerHTML = selectedPlaylistTracksTemplate(data);
+                get_likes();
+            }
+        });
+    }
+
+    $(document).on("click", ".btn-like", function (e) {
+        e.preventDefault();
+        vote(e.target.id, e.target.parentNode.parentNode.id + e.target.parentNode.parentNode.parentNode.id, true);
+    });
+    async function vote(id, who, like) {
+        let trackId = id;
+        let data = {
+            "trackId": trackId,
+            "userId": userId,
+            "playlistId": playlistId,
+            "like": like,
+            "who": who,
+            "displayName": displayName
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "/vote",
+            data: JSON.stringify(data),
+            contentType: "application/json"
+        }).done(function (data) {
+            if (data == "ok") {
+                get_likes();
+            }
+            else if (data == "Du kan inte rösta på din egen låt!") {
+                alert(data);
+            }
+            else if (data == "Röst borttagen") {
+                get_likes();
+            }
+            else {
+                alert("Något gick fel");
+            };
+
+        });
+    }
+    $(document).on("click", ".add-to-playlist", function (e) {
+        e.preventDefault();
+        add_song(document.getElementById('track').value);
+
+    });
+    function add_song(id) {
+        var trackId = id;
+        var data = {
+            "trackId": trackId,
+            "userId": userId,
+            "accessToken": access_token
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "/add_song",
+            data: JSON.stringify(data),
+            contentType: "application/json"
+
+        }).done(function (response) {
+            get_tracks();
+            alert(response.toString());
+
+        });
+
+    }
+})();
