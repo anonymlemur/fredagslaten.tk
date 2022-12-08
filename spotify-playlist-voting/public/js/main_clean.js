@@ -4,7 +4,7 @@
         var e, r = /([^&;=]+)=?([^&;]*)/g,
             q = window.location.hash.substring(1);
         while (e = r.exec(q)) {
-            hashParams[e[1]] = decodeURIComponent(e[2]); 
+            hashParams[e[1]] = decodeURIComponent(e[2]);
         }
         return hashParams;
     }
@@ -22,11 +22,8 @@
     var playlistId = "";
     var playlistName = "";
     var spotifyApiRoot = "https://api.spotify.com/v1";
-    //run get_likes dynamically
-    setInterval(function () {
-        get_likes();
-    }, 1000);
-    
+
+
     if (error) {
         alert("There was an error during the authentication");
     } else {
@@ -41,6 +38,13 @@
             $("#loading").hide();
         }
     }
+    function refresh() {
+        get_tracks();
+        get_likes();
+        setTimeout(refresh, 5000);
+
+    }
+
     async function get_likes() {
 
         $.ajax({
@@ -98,21 +102,30 @@
 
             }
         });
+        get_tracks();
+        refresh();
+    }
+    function get_tracks(first) {
         $.ajax({
             type: "POST",
             url: "/get_tracks",
             contentType: "application/json"
         }).done(function (data) {
             var i = 0;
+            var updateData = false;
             data.items.forEach(function (item) {
                 i++;
                 item.index = i;
+                if (((item.trackId == null || item.trackId == "")  && document.getElementsByClassName('box boxTom ' + item.addedBy).length == 0) || (item.trackId != "" && (!document.getElementById('song-' + item.trackId + "-" + item.addedBy))) ) {
+                    updateData = true;
+                }
             });
-            selectedPlaylistTracksPlaceholder.innerHTML = selectedPlaylistTracksTemplate(data);
+            if (updateData || first) {
+                selectedPlaylistTracksPlaceholder.innerHTML = selectedPlaylistTracksTemplate(data);
+                get_likes();
+            }
         });
-        setTimeout(() => { get_likes(); }, 50);
     }
-
 
     $(document).on("click", ".btn-like", function (e) {
         e.preventDefault();
@@ -170,7 +183,7 @@
             contentType: "application/json"
 
         }).done(function (response) {
-            getFredagsFromSpotify();
+            get_tracks();
             alert(response.toString());
 
         });
