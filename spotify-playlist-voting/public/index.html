@@ -46,20 +46,16 @@
     </div>
     <div id="loggedin">
       <div id="selected-playlist-container">
-        <div id="selected-playlist-tracks"></div>
+        <div id="selected-playlist-tracks" class="rows">
+          <div class="rows">
+        </div>
       </div>
     </div>
   </div>
   <script id="user-playlists-template" type="text/x-handlebars-template"></script>
   <script id="selected-playlist-tracks-template" type="text/x-handlebars-template">
-         <div class="rows">
+
             <div class="wrapper">
-
-                <div class="webflow-style-input">
-                  <input id="track" type="text" name="track" value="" placeholder="låtlänk"/></input>
-                  <button class="add-to-playlist" type="submit"><i class="fa fa-arrow-right"></i></button>
-                </div>
-
           </div>
            {{#each items}}
            {{#if trackId}}
@@ -69,7 +65,7 @@
                 <iframe style="border-radius:5px; " src="https://open.spotify.com/embed/track/{{trackId}}" width="300px"
                   height="352" frameBorder="0" allowfullscreen="" id="song-{{trackId}}-{{addedBy}}"
                   allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-                {{#if haveEveryoneSubmitted}}
+                {{#if canVote}}
                 <div class="caption">
                   <a href="#" id="{{trackId}}" class="btn-like btn btn-default">
                     <span id="{{trackId}}" class="fa fa-thumbs-up" aria-hidden="true"></span>

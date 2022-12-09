@@ -102,7 +102,7 @@
 
             }
         });
-        get_tracks();
+        get_tracks(true);
         refresh();
     }
     function get_tracks(first) {
@@ -113,18 +113,28 @@
         }).done(function (data) {
             var i = 0;
             var updateData = false;
+            var wrapper = '';
             data.items.forEach(function (item) {
                 i++;
                 item.index = i;
-                if (((item.trackId == null || item.trackId == "")  && document.getElementsByClassName('box boxTom ' + item.addedBy).length == 0) || (item.trackId != "" && (!document.getElementById('song-' + item.trackId + "-" + item.addedBy))) ) {
+                if (((item.trackId == null || item.trackId == "") && document.getElementsByClassName('box boxTom ' + item.addedBy).length == 0) || (item.trackId != "" && (!document.getElementById('song-' + item.trackId + "-" + item.addedBy)))) {
                     updateData = true;
+                }
+                if(item.canSubmit){
+                    wrapper = '<div class="webflow-style-input"><input id="track" type="text" name="track" value="" placeholder="' + item.text + '"/></input><button class="add-to-playlist" type="submit"><i class="fa fa-arrow-right"></i></button></div>'
+                }
+                else{
+                    wrapper = '<div class="webflow-style-input"><input id="track" type="text" name="track" value="" style="text-align: center; font-weight: bold;" placeholder="Försent för att byta låt" disabled/></input></div>'
                 }
             });
             if (updateData || first) {
                 selectedPlaylistTracksPlaceholder.innerHTML = selectedPlaylistTracksTemplate(data);
+                $('.wrapper').append(wrapper);
                 get_likes();
             }
         });
+
+
     }
 
     $(document).on("click", ".btn-like", function (e) {
