@@ -389,7 +389,9 @@ app.post("/vote", function (req, res) {
         "userId": req.body.userId,
         "like": req.body.like,
         "who": req.body.who,
-        "displayName": req.body.displayName
+        "displayName": req.body.displayName,
+        "imageURI": req.body.imageURI,
+        "timestamp": new Date().getTime()
     }
 
 
@@ -569,8 +571,8 @@ app.post("/get_tracks", async function (req, res) {
     let db = new JsonDB(new Config("appData", true, true, '/'));
 
 
-    let snapshot = await db.getData("/submitted-songs").then(console.log("get tracks"));
-    let snapshotLikes = await db.getData("/votes").then(console.log("get likes"));
+    let snapshot = await db.getData("/submitted-songs").then();
+    let snapshotLikes = await db.getData("/votes").then();
     let allLikes = [];
     for (let obj in snapshotLikes) {
         allLikes.push(snapshotLikes[obj]);
