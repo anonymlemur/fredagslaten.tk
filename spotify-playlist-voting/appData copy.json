@@ -37,11 +37,13 @@
             "like": true
         },
         "jagestedt": {
-            "trackId": "5vCQBUIWzPj0MnRcqhHJfs",
+            "trackId": "2BJy4svtrGACqRB5BFLOK6",
             "userId": "jagestedt",
             "like": true,
-            "who": "countes",
-            "displayName": "jagestedt"
+            "who": "1157601814",
+            "displayName": "jagestedt",
+            "imageURI": "https://i.scdn.co/image/ab6775700000ee85ca55c4da442cf2513de0b177",
+            "timestamp": 1670552015934
         }
     }
 }
