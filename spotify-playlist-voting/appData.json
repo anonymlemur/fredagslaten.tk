@@ -1,49 +1,25 @@
 {
     "submitted-songs": {
         "1157601814": {
-            "trackId": "2BJy4svtrGACqRB5BFLOK6",
+            "trackId": "",
             "display_name": "Frej",
             "userId": "1157601814"
         },
         "cgt594qxc32yf0sf14jf5gra2": {
-            "trackId": "4yOU9FaCmFFo2qfy1FHIe3",
+            "trackId": "",
             "display_name": "Linus",
             "userId": "cgt594qxc32yf0sf14jf5gra2"
         },
         "countes": {
-            "trackId": "5vCQBUIWzPj0MnRcqhHJfs",
+            "trackId": "",
             "display_name": "Lukas",
             "userId": "countes"
         },
         "jagestedt": {
-            "trackId": "3T4DdPVqWeaC4U7vrIxlKz",
+            "trackId": "",
             "display_name": "Joel",
             "userId": "jagestedt"
         }
     },
-    "votes": {
-        "1157601814": {
-            "trackId": "3T4DdPVqWeaC4U7vrIxlKz",
-            "displayName": "Frej Bäck",
-            "userId": "1157601814",
-            "who": "jagestedt",
-            "like": true
-        },
-        "countes": {
-            "trackId": "4yOU9FaCmFFo2qfy1FHIe3",
-            "displayName": "Lukas Elfving",
-            "userId": "countes",
-            "who": "cgt594qxc32yf0sf14jf5gra2",
-            "like": true
-        },
-        "jagestedt": {
-            "trackId": "2BJy4svtrGACqRB5BFLOK6",
-            "userId": "jagestedt",
-            "like": true,
-            "who": "1157601814",
-            "displayName": "jagestedt",
-            "imageURI": "https://i.scdn.co/image/ab6775700000ee85ca55c4da442cf2513de0b177",
-            "timestamp": 1670552015934
-        }
-    }
+    "votes": {}
 }

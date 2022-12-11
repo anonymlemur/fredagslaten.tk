@@ -13,7 +13,7 @@ var nodemailer = require("nodemailer");
 // var db = new JsonDB(new Config("appData", true, true, '/'));
 
 // const admin = require("firebase-admin");
-let serviceAccount = require("./firebaseServiceAccountKey.json");
+// let serviceAccount = require("./firebaseServiceAccountKey.json");
 // admin.initializeApp({
 //     credential: admin.credential.cert(serviceAccount)
 // });
@@ -733,28 +733,10 @@ app.post("/update_playlist", function (req, res) {
     let mostLikedSongArtist = [];
     let mostlikedSongCollection = [];
     var errorCode = "";
-    // var authOptions = {
-    //   url: 'https://accounts.spotify.com/api/token',
-    //   headers: {
-    //     'Authorization': 'Basic ' + (new Buffer(client_id + ':' + client_secret).toString('base64'))
-    //   },
-    //   form: {
-    //     grant_type: 'client_credentials'
-    //   },
-    //   json: true
-    // };
-
-    // request.post(authOptions, function(error, response, body) {
-    //   if (!error && response.statusCode === 200) {
-    //     access_token = body.access_token;
-    //   }
-
-    // });
-    request.post({ url: "https://fredagslaten.tk/get_likes", contentType: "application/json" }, function (error, response, body) {
+    request.post({ url: "https://fredagslaten.tk/get_likes", contentType: "application/json" }, async function (error, response, body) {
         if (!error && response.statusCode === 200) {
 
             mostLikedSongs = (JSON.parse(body)).items;
-            //mostLikedSongs get the most liked songs where likes are max
             mostLikedSongs.sort(function (a, b) {
                 return b.likes - a.likes;
             }
@@ -797,22 +779,31 @@ app.post("/update_playlist", function (req, res) {
                 }
 
             };
+            let db = new JsonDB(new Config("appData", true, true, '/'));
+
+
+            let snapshot = await db.getData("/submitted-songs");
+            let snapshotLikes = await db.getData("/votes");
+
             request.post(options, function (error, response, body) {
                 if (!error && response.statusCode === 201) {
                     //empty trackid from submitted songs collection
-                    db.collection("submitted-songs").get().then(function (querySnapshot) {
-                        querySnapshot.forEach(function (doc) {
-                            db.collection("submitted-songs").doc(doc.id).update({
-                                trackId: ""
-                            });
-                        });
-                    });
+
+                    for (let obj in snapshot) {
+                        console.log(obj + '/trackId');
+
+                        db.push("/submitted-songs/" + obj + '/trackId', "");
+                    }
 
                     return res.send("Playlist updated");
 
                 }
             }
+
             );
+            for (let obj in snapshotLikes) {
+                db.delete("/votes/" + obj);
+            }
             let songOptions = {
                 url: 'https://api.spotify.com/v1/tracks?ids=' + mostLikedSongId.join(","),
                 headers: { 'Authorization': access_token, 'Content-Type': 'application/json', 'Accept': 'application/json' },
@@ -837,8 +828,8 @@ app.post("/update_playlist", function (req, res) {
                         headers: { 'Content-Type': 'application/json' },
                         json: true,
                         body: {
-                            email: "linusri@kth.se, Lukas.elfving@gmail.com, frej.back@gmail.com, j.jagestedt@gmail.com",
-                            // email: "j.jagestedt@gmail.com",
+                            // email: "linusri@kth.se, Lukas.elfving@gmail.com, frej.back@gmail.com, j.jagestedt@gmail.com",
+                            email: "j.jagestedt@gmail.com",
                             subject: "Fredagslåten vecka " + weekNumber(),
                             message: mailMessage
 
@@ -855,17 +846,6 @@ app.post("/update_playlist", function (req, res) {
                     );
                 }
             });
-
-            db.collection("votes").listDocuments().then(val => {
-                val.map((val) => {
-                    val.delete();
-                })
-
-            });
-
-
-
-
 
 
         }
