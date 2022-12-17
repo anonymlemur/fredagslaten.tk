@@ -12,6 +12,9 @@
         selectedPlaylistTracksTemplate = Handlebars.compile(selectedPlaylistTracksSource),
         selectedPlaylistTracksPlaceholder = document.getElementById("selected-playlist-tracks");
 
+
+
+
     var params = getHashParams();
 
     var access_token = params.access_token,
@@ -19,6 +22,7 @@
 
     var userId = "";
     var displayName = "";
+    var imageURI = "";
     var playlistId = "";
     var playlistName = "";
     var spotifyApiRoot = "https://api.spotify.com/v1";
@@ -33,15 +37,15 @@
 
         } else {
             $("#loading").show();
+            $("#loading").hide();
             $("#login").show();
             $("#loggedin").hide();
-            $("#loading").hide();
         }
     }
     function refresh() {
         get_tracks();
         get_likes();
-        setTimeout(refresh, 5000);
+        setTimeout(refresh, 15000);
 
     }
 
@@ -91,6 +95,11 @@
             success: function (response) {
                 userId = response.id;
                 displayName = response.display_name;
+                try{
+                    imageURI = response.images[0].url;}
+                catch{
+                    imageURI = "";
+                }
                 $("#loading").hide();
                 $("#loggedin").show();
             },
@@ -102,10 +111,12 @@
 
             }
         });
-        get_tracks();
+        $("#loading").hide();
+        get_tracks(true);
         refresh();
     }
     function get_tracks(first) {
+        $("#loading").hide();
         $.ajax({
             type: "POST",
             url: "/get_tracks",
@@ -113,25 +124,35 @@
         }).done(function (data) {
             var i = 0;
             var updateData = false;
+            var wrapper = '';
             data.items.forEach(function (item) {
                 i++;
                 item.index = i;
-                if (((item.trackId == null || item.trackId == "")  && document.getElementsByClassName('box boxTom ' + item.addedBy).length == 0) || (item.trackId != "" && (!document.getElementById('song-' + item.trackId + "-" + item.addedBy))) ) {
+                if (((item.trackId == null || item.trackId == "") && document.getElementsByClassName('box boxTom ' + item.addedBy).length == 0) || (item.trackId != "" && (!document.getElementById('song-' + item.trackId + "-" + item.addedBy)))) {
                     updateData = true;
                 }
+                if (item.canSubmit && item.userId == userId) {
+                    wrapper = '<div class="webflow-style-input"><input id="track" type="text" name="track" value="" placeholder="' + item.text + '"/></input><button class="add-to-playlist" type="submit"><i class="fa fa-arrow-right"></i></button></div>'
+                }
+                // else {
+                //     wrapper = '<div class="webflow-style-input"><input id="track" type="text" name="track" value="" style="text-align: center; font-weight: bold;" placeholder="Försent för att byta låt" disabled/></input></div>'
+                // }
             });
             if (updateData || first) {
                 selectedPlaylistTracksPlaceholder.innerHTML = selectedPlaylistTracksTemplate(data);
+                $('.wrapper').append(wrapper);
                 get_likes();
             }
         });
+
+
     }
 
     $(document).on("click", ".btn-like", function (e) {
         e.preventDefault();
         vote(e.target.id, e.target.parentNode.parentNode.id + e.target.parentNode.parentNode.parentNode.id, true);
     });
-    async function vote(id, who, like) {
+    function vote(id, who, like) {
         let trackId = id;
         let data = {
             "trackId": trackId,
@@ -139,7 +160,8 @@
             "playlistId": playlistId,
             "like": like,
             "who": who,
-            "displayName": displayName
+            "displayName": displayName,
+            "imageURI": imageURI
         }
 
         $.ajax({
@@ -148,14 +170,13 @@
             data: JSON.stringify(data),
             contentType: "application/json"
         }).done(function (data) {
+            get_likes();
             if (data == "ok") {
-                get_likes();
             }
             else if (data == "Du kan inte rösta på din egen låt!") {
                 alert(data);
             }
             else if (data == "Röst borttagen") {
-                get_likes();
             }
             else {
                 alert("Något gick fel");
