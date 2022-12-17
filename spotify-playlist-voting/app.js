@@ -608,15 +608,17 @@ app.post("/get_tracks", async function (req, res) {
         track.addedBy = track.userId;
         track.display_name = display_name;
 
-        if (track.trackId != null && track.trackId != "") {
+        if (track.trackId && (track.trackId != "" || track.trackId != null)) {
+
             songsSubmitted++;
             text = "Ändra låt"
         }
-        track.text = text;
-        if (((new Date().getDay() == 4 || new Date().getDay() == 5) && (track.trackId == null || track.trackId == "")) || (new Date().getDay() != 4 && new Date().getDay() != 5)) {
-            track.canSubmit = true;
-        }
 
+        track.text = text;
+        // if (((new Date().getDay() == 4 || new Date().getDay() == 5) && (track.trackId == null || track.trackId == "")) || (new Date().getDay() != 4 && new Date().getDay() != 5)) {
+        //     track.canSubmit = true;
+        // }
+        track.canSubmit = true;
         exportTracks.push(track);
     });
     if (songsSubmitted == 4 || (new Date().getDay() == 4 || new Date().getDay() == 5)) {
@@ -792,8 +794,7 @@ app.post("/update_playlist", function (req, res) {
                     for (let obj in snapshot) {
                         console.log(obj + '/trackId');
 
-                        db.push("/submitted-songs/" + obj + '/trackId', "");
-                    }
+                        db.push("/submitted-songs/" + obj + '/trackId', "");                    }
 
                     return res.send("Playlist updated");
 
@@ -828,8 +829,8 @@ app.post("/update_playlist", function (req, res) {
                         headers: { 'Content-Type': 'application/json' },
                         json: true,
                         body: {
-                            // email: "linusri@kth.se, Lukas.elfving@gmail.com, frej.back@gmail.com, j.jagestedt@gmail.com",
-                            email: "j.jagestedt@gmail.com",
+                            email: "linusri@kth.se, Lukas.elfving@gmail.com, frej.back@gmail.com, j.jagestedt@gmail.com",
+                            //email: "j.jagestedt@gmail.com",
                             subject: "Fredagslåten vecka " + weekNumber(),
                             message: mailMessage
 

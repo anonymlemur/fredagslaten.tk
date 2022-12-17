@@ -11,7 +11,10 @@
     var selectedPlaylistTracksSource = document.getElementById("selected-playlist-tracks-template").innerHTML,
         selectedPlaylistTracksTemplate = Handlebars.compile(selectedPlaylistTracksSource),
         selectedPlaylistTracksPlaceholder = document.getElementById("selected-playlist-tracks");
-        
+
+
+
+
     var params = getHashParams();
 
     var access_token = params.access_token,
@@ -34,9 +37,9 @@
 
         } else {
             $("#loading").show();
+            $("#loading").hide();
             $("#login").show();
             $("#loggedin").hide();
-            $("#loading").hide();
         }
     }
     function refresh() {
@@ -92,7 +95,11 @@
             success: function (response) {
                 userId = response.id;
                 displayName = response.display_name;
-                imageURI = response.images[0].url;
+                try{
+                    imageURI = response.images[0].url;}
+                catch{
+                    imageURI = "";
+                }
                 $("#loading").hide();
                 $("#loggedin").show();
             },
@@ -104,10 +111,12 @@
 
             }
         });
+        $("#loading").hide();
         get_tracks(true);
         refresh();
     }
     function get_tracks(first) {
+        $("#loading").hide();
         $.ajax({
             type: "POST",
             url: "/get_tracks",
@@ -122,12 +131,12 @@
                 if (((item.trackId == null || item.trackId == "") && document.getElementsByClassName('box boxTom ' + item.addedBy).length == 0) || (item.trackId != "" && (!document.getElementById('song-' + item.trackId + "-" + item.addedBy)))) {
                     updateData = true;
                 }
-                if (item.canSubmit) {
+                if (item.canSubmit && item.userId == userId) {
                     wrapper = '<div class="webflow-style-input"><input id="track" type="text" name="track" value="" placeholder="' + item.text + '"/></input><button class="add-to-playlist" type="submit"><i class="fa fa-arrow-right"></i></button></div>'
                 }
-                else {
-                    wrapper = '<div class="webflow-style-input"><input id="track" type="text" name="track" value="" style="text-align: center; font-weight: bold;" placeholder="Försent för att byta låt" disabled/></input></div>'
-                }
+                // else {
+                //     wrapper = '<div class="webflow-style-input"><input id="track" type="text" name="track" value="" style="text-align: center; font-weight: bold;" placeholder="Försent för att byta låt" disabled/></input></div>'
+                // }
             });
             if (updateData || first) {
                 selectedPlaylistTracksPlaceholder.innerHTML = selectedPlaylistTracksTemplate(data);
@@ -143,7 +152,7 @@
         e.preventDefault();
         vote(e.target.id, e.target.parentNode.parentNode.id + e.target.parentNode.parentNode.parentNode.id, true);
     });
- function vote(id, who, like) {
+    function vote(id, who, like) {
         let trackId = id;
         let data = {
             "trackId": trackId,
