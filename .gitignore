@@ -7,3 +7,7 @@ appData copy.json
 spotify-playlist-voting/appData copy.json
 spotify-playlist-voting/appData copy.json
 .gitignore
+spotify-playlist-voting/appData.json
+friskel/
+spotify-playlist-voting/public/js/main_clean.js
+
