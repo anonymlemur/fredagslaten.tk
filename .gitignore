@@ -17,9 +17,5 @@ spotifyApiDetails.json
 emailDetails.json
 spotify-playlist-voting.zip
 spotify-playlist-voting/public/js/main copy.js
-<<<<<<< HEAD
 spotify-playlist-voting/appData copy.json
-
-=======
-spotify-playlist-voting/appData copy.json
->>>>>>> a6ba9b3 (	modified:   .gitignore)
+spotify-playlist-voting/appData.json
