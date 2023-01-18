@@ -16,16 +16,21 @@
 
 
     var params = getHashParams();
+    window.localStorage.setItem("access_token", params.access_token);
+    window.localStorage.setItem("refresh_token", params.refresh_token);
+    window.localStorage.setItem("error", params.error);
 
-    var access_token = params.access_token,
-        error = params.error;
+    var access_token = window.localStorage.getItem("access_token")
+        , refresh_token = window.localStorage.getItem("refresh_token"), error = window.localStorage.getItem("error");
 
     var userId = "";
     var displayName = "";
     var imageURI = "";
     var playlistId = "";
     var playlistName = "";
+    var canSubmit = window.localStorage.getItem("canSubmit");
     var spotifyApiRoot = "https://api.spotify.com/v1";
+    var text = window.localStorage.getItem("text");
 
 
     if (error) {
@@ -95,9 +100,10 @@
             success: function (response) {
                 userId = response.id;
                 displayName = response.display_name;
-                try{
-                    imageURI = response.images[0].url;}
-                catch{
+                try {
+                    imageURI = response.images[0].url;
+                }
+                catch {
                     imageURI = "";
                 }
                 $("#loading").hide();
@@ -117,6 +123,7 @@
     }
     function get_tracks(first) {
         $("#loading").hide();
+        var wrapper = '<div class="webflow-style-input" id="disabled"></div>';
         $.ajax({
             type: "POST",
             url: "/get_tracks",
@@ -124,24 +131,29 @@
         }).done(function (data) {
             var i = 0;
             var updateData = false;
-            var wrapper = '';
             data.items.forEach(function (item) {
                 i++;
                 item.index = i;
+                if (item.userId == userId) {
+                    canSubmit = item.canSubmit;
+                    window.localStorage.setItem("canSubmit", canSubmit);
+                    text = item.text;
+                    window.localStorage.setItem("text", text);
+                }
                 if (((item.trackId == null || item.trackId == "") && document.getElementsByClassName('box boxTom ' + item.addedBy).length == 0) || (item.trackId != "" && (!document.getElementById('song-' + item.trackId + "-" + item.addedBy)))) {
                     updateData = true;
                 }
-                if (item.canSubmit && item.userId == userId) {
-                    wrapper = '<div class="webflow-style-input"><input id="track" type="text" name="track" value="" placeholder="' + item.text + '"/></input><button class="add-to-playlist" type="submit"><i class="fa fa-arrow-right"></i></button></div>'
-                }
-                // else {
-                //     wrapper = '<div class="webflow-style-input"><input id="track" type="text" name="track" value="" style="text-align: center; font-weight: bold;" placeholder="Försent för att byta låt" disabled/></input></div>'
-                // }
             });
+
+
             if (updateData || first) {
                 selectedPlaylistTracksPlaceholder.innerHTML = selectedPlaylistTracksTemplate(data);
-                $('.wrapper').append(wrapper);
                 get_likes();
+            }
+            canSubmit ? wrapper = '<div class="webflow-style-input" id="enabled"><input id="track" type="text" name="track" value="" placeholder="' + text + '"><button class="add-to-playlist" type="submit"><i class="fa fa-arrow-right"></i></button></div>' : '<div class="webflow-style-input" id="disabled"><input id="track" type="text" name="track" value="" style="text-align: center; font-weight: bold;" placeholder="Försent för att byta låt" disabled/></input></div>';
+
+            if ($('.wrapper').html() != wrapper) {
+                $('.wrapper').html(wrapper);
             }
         });
 
