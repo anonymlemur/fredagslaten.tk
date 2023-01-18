@@ -8,16 +8,6 @@ var querystring = require("querystring");
 var cookieParser = require("cookie-parser");
 var nodemailer = require("nodemailer");
 
-
-
-// var db = new JsonDB(new Config("appData", true, true, '/'));
-
-// const admin = require("firebase-admin");
-// let serviceAccount = require("./firebaseServiceAccountKey.json");
-// admin.initializeApp({
-//     credential: admin.credential.cert(serviceAccount)
-// });
-// let db = admin.firestore();
 let appData = require("./appData.json");
 let spotifyApiDetails = require("./spotifyApiDetails.json");
 let emailDetails = require("./emailDetails.json");
@@ -88,9 +78,6 @@ app.get("/login", function (req, res) {
             state: state
         }));
 });
-//app.post("/logout", function (req, res) {¨
-//	localStorage.clear();
-//});
 app.post("/email", function (req, res) {
     transporter.sendMail({
         from: "Fredagslåten <noreply@fredagslaten.tk>",
@@ -330,14 +317,10 @@ app.post("/add_song", function (req, res) {
 
 app.post("/update_playlist", function (req, res) {
     function weekNumber(date = new Date()) {
-        // day 0 is monday
         const day = (date.getDay() + 6) % 7
-        // get thursday of present week
         const thursday = new Date(date)
         thursday.setDate(date.getDate() - day + 3)
-        // set 1st january first
         const firstThursday = new Date(thursday.getFullYear(), 0, 1)
-        // if Jan 1st is not a thursday...
         if (firstThursday.getDay() !== 4) {
             firstThursday.setMonth(0, 1 + (11 /* 4 + 7 */ - firstThursday.getDay()) % 7)
         }
@@ -411,8 +394,6 @@ app.post("/update_playlist", function (req, res) {
 
             request.post(options, function (error, response, body) {
                 if (!error && response.statusCode === 201) {
-                    //empty trackid from submitted songs collection
-
                     for (let obj in snapshot) {
                         console.log(obj + '/trackId');
 
@@ -462,7 +443,7 @@ app.post("/update_playlist", function (req, res) {
                     };
                     request.post(emailOptions, function (error, response, body) {
                         if (!error && response.statusCode === 200) {
-                            //return res.send("Email sent");
+                            console.log("Email sent");
 
 
                         }
