@@ -25,7 +25,7 @@
          fredagslåt!">
   <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
   <link rel="stylesheet" href="css/font-awesome.css">
-  <link rel="stylesheet" href="assets/fontawesome/css/solid.css" >
+  <link rel="stylesheet" href="assets/fontawesome/css/solid.css">
   <link href="assets/fontawesome/css/fontawesome.css" rel="stylesheet">
   <link href="assets/fontawesome/css/brands.css" rel="stylesheet">
   <link rel="stylesheet" href="css/main.css?v=1.1">
@@ -50,17 +50,41 @@
     </div>
     <div id="loggedin">
       <div id="selected-playlist-container">
+        <div class="wrapper">
+        </div>
         <div id="selected-playlist-tracks" class="rows">
 
           <div class="rows">
+          </div>
+        </div>
+        <div class="playlist-wrapper" style="display: none;">
+          <div class="playlist-div-fre box">
+            <div class="thumbnail" id="playlistbox">
+              <h2 class="added-by">Fredagslåten 2 Electric boogaloo</h2>
+              <iframe id="playlist" style="border-radius:5px"
+                src="https://open.spotify.com/embed/playlist/6CiGXt6v60opLz0v45JI5i?utm_source=generator" width="100%"
+                height="380" frameBorder="0" allowfullscreen=""
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                loading="lazy"></iframe>
+            </div>
+          </div>
+
+          <div class="playlist-div-all box">
+            <div class="thumbnail" id="playlistbox">
+              <h2 class="added-by">Alla bidrag</h2>
+              <iframe id="playlist" style="border-radius:5px"
+                src="https://open.spotify.com/embed/playlist/4wBuklcIoGf4ZVXRPNzQ2r?utm_source=generator&theme=0"
+                width="100%" height="380" frameBorder="0" allowfullscreen=""
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                loading="lazy"></iframe>
+            </div>
           </div>
         </div>
       </div>
     </div>
     <script id="user-playlists-template" type="text/x-handlebars-template"></script>
     <script id="selected-playlist-tracks-template" type="text/x-handlebars-template">
-      <div class="wrapper">
-      </div>
+
       {{#each items}}
       {{#if trackId}}
       <div class="song box" id="song-{{index}}">
@@ -97,29 +121,12 @@
       </div>
       {{/if}}
       {{/each}}
-      <div class="playlist-div-fre box">
-        <div class="thumbnail" id="playlistbox">
-          <h2 class="added-by">Fredagslåten 2 Electric boogaloo</h2>
-          <iframe id="playlist" style="border-radius:5px"
-            src="https://open.spotify.com/embed/playlist/6CiGXt6v60opLz0v45JI5i?utm_source=generator" width="100%"
-            height="380" frameBorder="0" allowfullscreen=""
-            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-        </div>
       </div>
-      <div class="playlist-div-all box">
-        <div class="thumbnail" id="playlistbox">
-          <h2 class="added-by">Alla bidrag</h2>
-          <iframe id="playlist" style="border-radius:5px"
-            src="https://open.spotify.com/embed/playlist/4wBuklcIoGf4ZVXRPNzQ2r?utm_source=generator&theme=0" width="100%"
-            height="380" frameBorder="0" allowfullscreen=""
-            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-        </div>
-      </div>
-      </div>
+
     </script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.4.2/handlebars.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src="js/main.js"></script>
+    <script src="js/main.js?v=1.1"></script>
 </body>
 
 </html>

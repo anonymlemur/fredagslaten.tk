@@ -80,95 +80,18 @@
   }
 }
 
-#song-1 {
-  grid-column: col 1;
+#playlistbox{
+  width: 55vw;
+  min-width: 350px;
 }
 
-#song-2 {
-  grid-column: col 2;
+.playlist-wrapper{
+  display: none;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  flex-wrap: wrap;
 }
-
-#song-3 {
-  grid-column: col 3;
-}
-
-#song-4 {
-  grid-column: col 4;
-}
-
-.playlist-div-fre {
-  grid-column: col 1 / span 4;
-  grid-row-start: row 3;
-}
-
-.playlist-div-all {
-  grid-column: col 1 / span 4;
-  grid-row-start: row 4;
-}
-
-@media (max-width: 1280px) {
-  #song-1 {
-    grid-column: col 1 / span 2;
-    grid-row-start: row 2;
-  }
-
-  #song-2 {
-    grid-column: col 3 / span 2;
-    grid-row-start: row 2;
-  }
-
-  #song-3 {
-    grid-column: col 1 / span 2;
-    grid-row-start: row 3;
-  }
-
-  #song-4 {
-    grid-column: col 3 / span 2;
-    grid-row-start: row 3;
-
-  }
-
-  .playlist-div-fre {
-    grid-row-start: row 4;
-  }
-
-  .playlist-div-all {
-    grid-row-start: row 5;
-  }
-}
-
-@media (max-width: 700px) {
-  #song-1 {
-    grid-column: col 1 / span 4;
-    grid-row-start: row 2;
-  }
-
-  #song-2 {
-    grid-column: col 1 / span 4;
-    grid-row-start: row 3;
-  }
-
-  #song-3 {
-    grid-column: col 1 / span 4;
-    grid-row-start: row 4;
-  }
-
-  #song-4 {
-    grid-column: col 1 / span 4;
-    grid-row-start: row 5;
-
-  }
-
-  .playlist-div-fre {
-    grid-row-start: row 6;
-  }
-
-  .playlist-div-all {
-    grid-row-start: row 7;
-  }
-}
-
-
 
 .thumbnail {
   border-radius: 5px;
@@ -188,21 +111,20 @@ h2 {
 }
 
 .song {
-  grid-row-start: row 2;
   align-self: center;
-  justify-self: center;
-
 }
 
 .wrapper {
+  margin-top: 13px;
   grid-column: col 2 / span 2;
   grid-row-start: row 1;
   border-radius: 5px;
-
 }
 
 .rows {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 13px;
   grid-gap: 10px;
   align-items: center;
   color: #444;
@@ -308,6 +230,7 @@ body {
   height: 115px;
   ;
 }
+
 .deadspace-iframe {
   height: 109.5px;
 }
@@ -315,8 +238,8 @@ body {
 .boxText {
   filter: invert(100%);
   font-stretch: expanded;
-  letter-spacing: 1.404rem;
-  font-size: 27px;
+  letter-spacing: 1.4rem;
+  font-size: 24px;
   font-weight: bold;
   font-family: CircularSp, CircularSp-Arab, CircularSp-Hebr, CircularSp-Cyrl, CircularSp-Grek, CircularSp-Deva, var(--fallback-fonts, );
   line-height: 83px;
@@ -387,6 +310,8 @@ button {
   margin: 0 auto;
   border-radius: 5px;
   padding: 1.4rem 2rem 1.8rem;
+  min-height: 58px;
+  min-width: 324.333px;
 }
 
 .webflow-style-input:after {
