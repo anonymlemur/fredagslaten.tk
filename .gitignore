@@ -10,4 +10,10 @@ spotify-playlist-voting/appData copy.json
 spotify-playlist-voting/appData.json
 friskel/
 spotify-playlist-voting/public/js/main_clean.js
+package-lock.json
+firebaseServiceAccountKey.json
+spotifyApiDetails.json
+emailDetails.json
+spotify-playlist-voting.zip
+spotify-playlist-voting/public/js/main copy.js
 
