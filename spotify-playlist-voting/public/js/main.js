@@ -14,14 +14,13 @@
 
 
 
-
     var params = getHashParams();
-    params.access_token ===  undefined ? null : window.localStorage.setItem("access_token", params.access_token);
-    window.localStorage.setItem("refresh_token", params.refresh_token);
+    params.access_token === undefined ? null : window.localStorage.setItem("access_token", params.access_token);
+    params.refresh_token === undefined ? null : window.localStorage.setItem("refresh_token", params.refresh_token);
     params.error === undefined ? window.localStorage.setItem("error", '') : window.localStorage.setItem("error", params.error);
 
     var access_token = window.localStorage.getItem("access_token")
-        , refresh_token = window.localStorage.getItem("refresh_token"), error = window.localStorage.getItem("error")  ;
+        , refresh_token = window.localStorage.getItem("refresh_token"), error = window.localStorage.getItem("error");
 
     var userId = "";
     var displayName = "";
@@ -46,8 +45,20 @@
             $("#loading").hide();
             $("#login").show();
             $("#loggedin").hide();
-            
+
         }
+    }
+    function tokenRefresh() {
+        $.ajax({
+            url: "/refresh_token",
+            data: {
+                "refresh_token": refresh_token
+            }
+        }).done(function (data) {
+            access_token = data.access_token;
+            window.localStorage.setItem("access_token", access_token);
+        });
+        setTimeout(tokenRefresh, 300000);
     }
     function refresh() {
         get_tracks();
@@ -65,14 +76,14 @@
         }).done(function (data) {
             for (let item of data.items) {
                 if (item.trackId) {
-                    let users = "";
-                    if (item.users.length != 0) {
-                        users += `(${item.displayNames})`;
-                    }
-                    else {
-                        users += "inga röster";
-                    }
-                    $("#likes-" + item.trackId + "-" + item.addedBy).html(item.likes + "<br>" + users);
+                    // let users = "";
+                    // if (item.users.length != 0) {
+                    //     users += `(${item.displayNames})`;
+                    // }
+                    // else {
+                    //     users += "inga röster";
+                    // }
+                    $("#likes-" + item.trackId + "-" + item.addedBy.replace(".", "\\.")).html(item.likes);
 
                     if (item.users.includes(userId)) {
                         $("#" + item.trackId).css({ "background": "none", "color": "rgb(201, 249, 197)" });
@@ -125,19 +136,9 @@
         $("#loading").hide();
         get_tracks(true);
         refresh();
-        
+
     }
-    function refresh() {
-        $.ajax({
-            url: "/refresh_token",
-            data: {
-                "refresh_token": refresh_token
-            }
-        }).done(function (data) {
-            access_token = data.access_token;
-            window.localStorage.setItem("access_token", access_token);
-        });
-    }
+
 
     function get_tracks(first) {
         $("#loading").hide();
@@ -242,4 +243,5 @@
         });
 
     }
+    tokenRefresh();
 })();

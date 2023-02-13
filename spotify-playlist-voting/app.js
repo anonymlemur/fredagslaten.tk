@@ -7,6 +7,7 @@ var cors = require("cors");
 var querystring = require("querystring");
 var cookieParser = require("cookie-parser");
 var nodemailer = require("nodemailer");
+var HTMLParser = require('node-html-parser');
 
 let appData = require("./appData.json");
 let spotifyApiDetails = require("./spotifyApiDetails.json");
@@ -33,7 +34,7 @@ const tzDiff = (first, second) => (first.getTimezoneOffset() - second.getTimezon
 
 
 
-const { readFile } = require("fs");
+const { readFile, writeFile } = require("fs");
 
 var redirect_uri = "https://fredagslaten.tk/callback";
 
@@ -216,6 +217,17 @@ app.post("/vote", function (req, res) {
 });
 
 app.post("/get_tracks", async function (req, res) {
+    function weekNumber(date = new Date()) {
+        const day = (date.getDay() + 6) % 7
+        const thursday = new Date(date)
+        thursday.setDate(date.getDate() - day + 3)
+        const firstThursday = new Date(thursday.getFullYear(), 0, 1)
+        if (firstThursday.getDay() !== 4) {
+            firstThursday.setMonth(0, 1 + (11 /* 4 + 7 */ - firstThursday.getDay()) % 7)
+        }
+        const weekNumber = 1 + Math.floor((thursday - firstThursday + tzDiff(firstThursday, thursday)) / WEEK)
+        return weekNumber
+    }
     let songsSubmitted = 0;
     let canVote = false;
     let canSubmit = false;
@@ -223,6 +235,7 @@ app.post("/get_tracks", async function (req, res) {
 
     let snapshot = await db.getData("/submitted-songs").then();
     let snapshotLikes = await db.getData("/votes").then();
+    let week = await db.getData("/date/week").then();
     let allLikes = [];
     for (let obj in snapshotLikes) {
         allLikes.push(snapshotLikes[obj]);
@@ -272,7 +285,7 @@ app.post("/get_tracks", async function (req, res) {
         track.canSubmit = true;
         exportTracks.push(track);
     });
-    if (songsSubmitted == 7 || new Date().getDay() == 5) {
+    if (songsSubmitted == 7 || (new Date().getDay() == 5 && weekNumber() == week)) {
         canVote = true;
     }
 
@@ -283,10 +296,12 @@ app.post("/get_tracks", async function (req, res) {
 
     return res.send({ items: exportTracks });
 });
+
 app.post("/add_song", function (req, res) {
     let db = new JsonDB(new Config("appData", true, true, '/'));
     let documentId = req.body.userId;
     let trackIdIn = req.body.trackId;
+    let options;
     if (trackIdIn.startsWith("https://open.spotify.com/track/")) {
         trackIdIn = trackIdIn.substring(31);
     }
@@ -296,24 +311,67 @@ app.post("/add_song", function (req, res) {
     if (trackIdIn.startsWith("spotify:track:")) {
         trackIdIn = trackIdIn.substring(14);
     }
-    let options = { method: "GET", url: "https://api.spotify.com/v1/tracks/" + trackIdIn, headers: { Authorization: "Bearer " + req.body.accessToken } };
-    request(options, function (error, response, body) {
-        if (error) throw new Error(error);
-        if (response.statusCode != 200) {
-            return res.send("Låten är inte giltig");
+    if (trackIdIn.startsWith("https://spotify.link/")) {
+        //trackIdIn = trackIdIn.substring(21);
 
+        async function getapi(url) {
+            const response = await fetch(url);
+            var data = await response.text();
+            return parseHtml(data);
         }
-        else {
-            db.push("/submitted-songs/" + documentId + "/trackId", trackIdIn).catch(err => {
-                stringReturn = "User not authorized";
-                console.log("User " + documentId + " not found",);
+        function parseHtml(data) {
+            const root = HTMLParser.parse(data);
+            let link = root.querySelector('.action').attributes.href.substring(6, root.querySelector('.action').attributes.href.indexOf('?'));
+            return link;
+        }
+        getapi(trackIdIn).then(function (data) {
+            options = {
+                method: "GET", url: "https://api.spotify.com/v1/tracks/" + data, headers: {
+                    Authorization: "Bearer " + req.body.accessToken
+                }
+            };
+            console.log(options);
+            request(options, function (error, response, body) {
+                if (error) throw new Error(error);
+                if (response.statusCode != 200) {
+                    return res.send("Låten är inte giltig");
 
+                }
+                else {
+                    db.push("/submitted-songs/" + documentId + "/trackId", trackIdIn).catch(err => {
+                        stringReturn = "User not authorized";
+                        console.log("User " + documentId + " not found",);
+
+                    });
+                    return res.send("Sång tillagd");
+                }
             });
-            return res.send("Sång tillagd");
-        }
-    });
-});
+        })
+    }
+    else {
+        options = {
+            method: "GET", url: "https://api.spotify.com/v1/tracks/" + trackIdIn, headers: {
+                Authorization: "Bearer " + req.body.accessToken
+            }
+        };
+        request(options, function (error, response, body) {
+            if (error) throw new Error(error);
+            if (response.statusCode != 200) {
+                return res.send("Låten är inte giltig");
 
+            }
+            else {
+                db.push("/submitted-songs/" + documentId + "/trackId", trackIdIn).catch(err => {
+                    stringReturn = "User not authorized";
+                    console.log("User " + documentId + " not found",);
+
+                });
+                return res.send("Sång tillagd");
+            }
+        });
+    }
+
+});
 
 app.post("/update_playlist", function (req, res) {
     function weekNumber(date = new Date()) {
@@ -327,6 +385,19 @@ app.post("/update_playlist", function (req, res) {
         const weekNumber = 1 + Math.floor((thursday - firstThursday + tzDiff(firstThursday, thursday)) / WEEK)
         return weekNumber
     }
+    readFile('appData.json', 'utf8', function (err, data) {
+        if (err) {
+            return console.log(err);
+        }
+        writeFile("backup/appDataWeek" + weekNumber() + ".json", data, function (err) {
+            if (err) {
+                return console.log(err);
+            }
+            console.log("The file was saved!");
+        });
+    });
+
+
     let playlistId = "6CiGXt6v60opLz0v45JI5i";
     let loserPlaylistId = "4wBuklcIoGf4ZVXRPNzQ2r";
     let client_id = spotifyApiDetails.client_id;
@@ -335,10 +406,8 @@ app.post("/update_playlist", function (req, res) {
     let mostLikedSongs = [];
     let allSongs = [];
     let mostLikedSong = [];
-    let mostLikedSongName = [];
     let mostLikedSongId = [];
-    let mostLikedSongArtist = [];
-    let mostlikedSongCollection = [];
+    let winners = [];
     var errorCode = "";
     request.post({ url: "https://fredagslaten.tk/get_likes", contentType: "application/json" }, async function (error, response, body) {
         if (!error && response.statusCode === 200) {
@@ -348,10 +417,12 @@ app.post("/update_playlist", function (req, res) {
                 return b.likes - a.likes;
             }
             );
-            mostLikedSongs.forEach(function (song) {
+            mostLikedSongs.filter(function (song) {
                 if (song.likes == mostLikedSongs[0].likes) {
                     mostLikedSong.push("spotify:track:" + song.trackId);
                     mostLikedSongId.push(song.trackId);
+                    let person = { id: song.trackId, likes: song.likes, display_name: song.display_name };
+                    winners.push(person);
                 }
                 if (song.trackId != null && song.trackId != "") {
                     allSongs.push("spotify:track:" + song.trackId);
@@ -360,6 +431,7 @@ app.post("/update_playlist", function (req, res) {
 
             );
             console.log("allSongs: \n" + allSongs);
+            console.log(winners);
             let loserOptions = {
                 url: 'https://api.spotify.com/v1/playlists/' + loserPlaylistId + '/tracks',
                 headers: { 'Authorization': access_token },
@@ -388,7 +460,7 @@ app.post("/update_playlist", function (req, res) {
             };
             let db = new JsonDB(new Config("appData", true, true, '/'));
 
-
+            db.push("/date/week/", weekNumber() + 1);
             let snapshot = await db.getData("/submitted-songs");
             let snapshotLikes = await db.getData("/votes");
 
@@ -398,6 +470,7 @@ app.post("/update_playlist", function (req, res) {
                         console.log(obj + '/trackId');
 
                         db.push("/submitted-songs/" + obj + '/trackId', "");
+
                     }
 
                     return res.send("Playlist updated");
@@ -417,17 +490,21 @@ app.post("/update_playlist", function (req, res) {
                 if (!error && response.statusCode === 200) {
                     body = JSON.parse(body);
                     body.tracks.forEach(function (song) {
-                        mostLikedSongName.push(song.name);
-                        mostLikedSongArtist.push(song.artists[0].name);
-                        mostlikedSongCollection.push("<br>" + `<a href="https://open.spotify.com/track/${song.id}">` + song.name + " - " + song.artists[0].name + '</a>');
-
+                        winners.filter(function (person) {
+                            if (person.id == song.id) {
+                                person.songName = song.name;
+                                person.artist = song.artists.map((artist) => artist.name).join(', ').replace(/,/, ' feat.');
+                            }
+                        });
                     });
-                    if (mostLikedSongName.length === 1) {
-                        mailMessage = "Veckans låt är:" + mostlikedSongCollection.join(" ") + '<br><br>Lyssna på den här:   <a href="https://open.spotify.com/playlist/6CiGXt6v60opLz0v45JI5i">Fredagslåten 2 Electric boogaloo</a> <br><br>Glöm inte att lägga till och rösta på nästa veckas låtar! '
+                    let vote = winners[0].likes == "1" ? "</b> röst är:" : "</b> röster är:";
+                    mailMessage = "Ny fredag ny fredagslåt! <br>Vinnare vecka " + weekNumber() + ", med <b>" + winners[0].likes + vote
+
+                    winners.forEach(function (winner) {
+                        mailMessage += "<br><b>" + winner.display_name + `</b> med låt: <a href="https://open.spotify.com/track/${winner.trackId}">"` + winner.songName + '"</a> av ' + winner.artist;
                     }
-                    else {
-                        mailMessage = "Veckans låtar är:" + mostlikedSongCollection.join(" ") + '<br><br>Lyssna på dem här:   <a href="https://open.spotify.com/playlist/6CiGXt6v60opLz0v45JI5i">Fredagslåten 2 Electric boogaloo</a> <br><br>Glöm inte att lägga till och rösta på nästa veckas låtar!';
-                    }
+                    );
+                    mailMessage += '<br><br>Lyssna på alla fredagslåtar här:   <a href="https://open.spotify.com/playlist/6CiGXt6v60opLz0v45JI5i">Fredagslåten 2 Electric boogaloo</a> <br><br>Glöm inte att lägga till och rösta på nästa veckas låtar!';
                     let emailOptions = {
                         url: 'https://fredagslaten.tk/email',
                         headers: { 'Content-Type': 'application/json' },

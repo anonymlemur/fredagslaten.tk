@@ -80,12 +80,12 @@
   }
 }
 
-#playlistbox{
+#playlistbox {
   width: 55vw;
   min-width: 350px;
 }
 
-.playlist-wrapper{
+.playlist-wrapper {
   display: none;
   display: flex;
   align-items: stretch;
@@ -227,12 +227,11 @@ body {
 
 
 .deadspace {
-  height: 115px;
-  ;
+  height: 95.883px;
 }
 
 .deadspace-iframe {
-  height: 109.5px;
+  height: 90.92px;
 }
 
 .boxText {
