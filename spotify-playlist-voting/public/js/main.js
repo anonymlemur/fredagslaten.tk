@@ -83,7 +83,7 @@
                     // else {
                     //     users += "inga röster";
                     // }
-                    $("#likes-" + item.trackId + "-" + item.addedBy.replace(".", "\\.")).html(item.likes);
+                    // $("#likes-" + item.trackId + "-" + item.addedBy.replace(".", "\\.")).html(item.likes);
 
                     if (item.users.includes(userId)) {
                         $("#" + item.trackId).css({ "background": "none", "color": "rgb(201, 249, 197)" });
@@ -144,6 +144,7 @@
         $("#loading").hide();
         var wrapper = '<div class="webflow-style-input" id="disabled"></div>';
         var canSubmit = true;
+        var remove = "";
         $.ajax({
             type: "POST",
             url: "/get_tracks",
@@ -152,6 +153,7 @@
             var i = 0;
             var updateData = false;
             var text = "Lägg till låt"
+            var canRemove = false;
             data.items.forEach(function (item) {
                 i++;
                 item.index = i;
@@ -160,8 +162,12 @@
                     window.localStorage.setItem("canSubmit", canSubmit);
                     text = item.text;
                     window.localStorage.setItem("text", text);
+                    if (item.trackId) {
+                        canRemove = true;
+                    }
                 }
-                if (((item.trackId == null || item.trackId == "") && document.getElementsByClassName('box boxTom ' + item.addedBy).length == 0) || (item.trackId != "" && (!document.getElementById('song-' + item.trackId + "-" + item.addedBy)))) {
+                // if (((item.trackId == null || item.trackId == "") && document.getElementsByClassName('box boxTom ' + item.addedBy).length != 0) || (item.trackId != "" && (!document.getElementById('song-' + item.trackId + "-" + item.addedBy)))) {
+                if (((item.trackId == null || item.trackId == "") && document.getElementById(item.addedBy)) || (item.trackId != "" && (!document.getElementById('song-' + item.trackId + "-" + item.addedBy)))) {
                     updateData = true;
                 }
             });
@@ -170,12 +176,17 @@
             if (updateData || first) {
                 selectedPlaylistTracksPlaceholder.innerHTML = selectedPlaylistTracksTemplate(data);
                 get_likes();
+                get_tracks();
             }
-            canSubmit ? wrapper = '<div class="webflow-style-input" id="enabled"><input id="track" type="text" name="track" value="" placeholder="' + text + '"><button class="add-to-playlist" type="submit"><i class="fa fa-arrow-right"></i></button></div>' : '<div class="webflow-style-input" id="disabled"><input id="track" type="text" name="track" value="" style="text-align: center; font-weight: bold;" placeholder="Försent för att byta låt" disabled/></input></div>';
-
+            canSubmit ? wrapper = '<div class="webflow-style-input add-song" id="enabled"><input id="track" type="text" name="track" value="" placeholder="' + text + '"><button class="add-to-playlist" type="submit"><i class="fa fa-arrow-right"></i></button></div>' : '<div class="webflow-style-input add-song" id="disabled"><input id="track" type="text" name="track" value="" style="text-align: center; font-weight: bold;" placeholder="Försent för att byta låt" disabled/></input></div>';
+            canRemove ? wrapper += '<div class="webflow-style-input remove"><button class="remove-from-playlist"><i class="fa fa-trash"></i></button></div>' : '';
+            
             if ($('.wrapper').html() != wrapper) {
                 $('.wrapper').html(wrapper);
             }
+            // if ($('.remove').html() != remove) {
+            //     $('.remove').html(remove);
+            // }
         });
 
 
@@ -222,6 +233,14 @@
         add_song(document.getElementById('track').value);
 
     });
+    $(document).on("click", ".remove-from-playlist", function (e) {
+        e.preventDefault();
+        remove_song();
+    });
+    function remove_song() {
+        add_song("delete");
+        }
+
     function add_song(id) {
         var trackId = id;
         var data = {
@@ -238,7 +257,7 @@
 
         }).done(function (response) {
             get_tracks();
-            alert(response.toString());
+            // alert(response.toString());
 
         });
 

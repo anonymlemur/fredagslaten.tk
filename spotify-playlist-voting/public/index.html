@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="assets/fontawesome/css/solid.css">
   <link href="assets/fontawesome/css/fontawesome.css" rel="stylesheet">
   <link href="assets/fontawesome/css/brands.css" rel="stylesheet">
-  <link rel="stylesheet" href="css/main.css?v=1.1">
+  <link rel="stylesheet" href="css/main.css?v=1.2">
 </head>
 
 <body>
@@ -50,8 +50,11 @@
     </div>
     <div id="loggedin">
       <div id="selected-playlist-container">
+
         <div class="wrapper">
+
         </div>
+        <!-- <h2 class="header">Veckans låtar!</h2> -->
         <div id="selected-playlist-tracks" class="rows">
 
           <div class="rows">
@@ -89,7 +92,7 @@
       {{#if trackId}}
       <div class="song box" id="song-{{index}}">
         <div class="thumbnail" id="{{addedBy}}">
-          <h2 class="added-by">{{display_name}}</h2>
+          {{!-- <h2 class="added-by">{{display_name}}</h2> --}}
           <iframe style="border-radius:5px; " src="https://open.spotify.com/embed/track/{{trackId}}" width="300px"
             height="352" frameBorder="0" allowfullscreen="" id="song-{{trackId}}-{{addedBy}}"
             allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
@@ -98,15 +101,15 @@
             <a href="#" id="{{trackId}}" class="btn-like btn btn-default">
               <span id="{{trackId}}" class="fa fa-solid fa-heart" aria-hidden="true"></span>
             </a>
-            </p>Antal röster: <span id="likes-{{trackId}}-{{addedBy}}"></span>
+            {{!-- </p>Antal röster: <span id="likes-{{trackId}}-{{addedBy}}"></span> --}}
           </div>
-          {{else}}
+          {{!-- {{else}}
           <div class="deadspace-iframe">
-          </div>
+          </div> --}}
           {{/if}}
         </div>
       </div>
-      {{else}}
+      {{!-- {{else}}
       <div class="song box" id="song-{{index}}">
         <div class="thumbnail" id="{{addedBy}}">
           <h2 class="added-by">{{display_name}}</h2>
@@ -118,7 +121,7 @@
           <div class="deadspace">
           </div>
         </div>
-      </div>
+      </div> --}}
       {{/if}}
       {{/each}}
       </div>
@@ -126,7 +129,7 @@
     </script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.4.2/handlebars.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src="js/main.js?v=1.1"></script>
+    <script src="js/main.js?v=1.3"></script>
 </body>
 
 </html>

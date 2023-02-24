@@ -282,7 +282,9 @@ app.post("/get_tracks", async function (req, res) {
         // if (((new Date().getDay() == 4 || new Date().getDay() == 5) && (track.trackId == null || track.trackId == "")) || (new Date().getDay() != 4 && new Date().getDay() != 5)) {
         //     track.canSubmit = true;
         // }
+if( weekNumber() == week){
         track.canSubmit = true;
+}
         exportTracks.push(track);
     });
     if (songsSubmitted == 7 || (new Date().getDay() == 5 && weekNumber() == week)) {
@@ -302,6 +304,11 @@ app.post("/add_song", function (req, res) {
     let documentId = req.body.userId;
     let trackIdIn = req.body.trackId;
     let options;
+    if (trackIdIn == "delete") {
+        db.push("/submitted-songs/" + documentId + "/trackId", "");
+        return res.send("Låt borttagen");
+        
+    }
     if (trackIdIn.startsWith("https://open.spotify.com/track/")) {
         trackIdIn = trackIdIn.substring(31);
     }
