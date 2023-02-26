@@ -230,7 +230,7 @@ app.post("/get_tracks", async function (req, res) {
     }
     let songsSubmitted = 0;
     let canVote = false;
-    let canSubmit = false;
+    let canView = false;
     let db = new JsonDB(new Config("appData", true, true, '/'));
 
     let snapshot = await db.getData("/submitted-songs").then();
@@ -250,6 +250,7 @@ app.post("/get_tracks", async function (req, res) {
         let totalLikes = 0;
         let users = [];
         let display_name = track.display_name;
+        track.canView = false;
         if (snapshotLikes[track.userId]) {
             let display_name = snapshotLikes[track.userId].displayName;
         }
@@ -282,21 +283,31 @@ app.post("/get_tracks", async function (req, res) {
         // if (((new Date().getDay() == 4 || new Date().getDay() == 5) && (track.trackId == null || track.trackId == "")) || (new Date().getDay() != 4 && new Date().getDay() != 5)) {
         //     track.canSubmit = true;
         // }
-if( weekNumber() == week){
-        track.canSubmit = true;
-}
+        if (weekNumber() == week) {
+            track.canSubmit = true;
+        }
+        // if (new Date().getDay() == 5 && weekNumber() == week) {
+        //     track.canView = true;
+
+        // }
         exportTracks.push(track);
+
     });
-    if (songsSubmitted == 7 || (new Date().getDay() == 5 && weekNumber() == week)) {
-        canVote = true;
-    }
+    // if (songsSubmitted == 7 || ((new Date().getDay() == 5 || new Date().getDay() == 4) && weekNumber() == week)) {
+    //     if (songsSubmitted == 7 || new Date().getDay() == 5) {
+    //         canVote = true;
+    //     }
+    //     canView = true;
+    // }
 
     allTracks.forEach(function (track) {
-        track.canVote = canVote;
+        songsSubmitted == 7 || (new Date().getDay() == 5 && weekNumber() == week) ? track.canVote = true : false;
+        songsSubmitted == 7 || ((new Date().getDay() == 5 || new Date().getDay() == 4) && weekNumber() == week) ? track.canView = true : false;
     });
 
 
     return res.send({ items: exportTracks });
+
 });
 
 app.post("/add_song", function (req, res) {
@@ -306,8 +317,15 @@ app.post("/add_song", function (req, res) {
     let options;
     if (trackIdIn == "delete") {
         db.push("/submitted-songs/" + documentId + "/trackId", "");
+        db.getData("/votes").then((v) => {
+            for (let obj in v) {
+                if (v[obj].who == documentId) {
+                    db.delete("/votes/" + obj);
+                }
+            }
+        });
         return res.send("Låt borttagen");
-        
+
     }
     if (trackIdIn.startsWith("https://open.spotify.com/track/")) {
         trackIdIn = trackIdIn.substring(31);
@@ -505,7 +523,7 @@ app.post("/update_playlist", function (req, res) {
                         });
                     });
                     let vote = winners[0].likes == "1" ? "</b> röst är:" : "</b> röster är:";
-                    mailMessage = "Ny fredag ny fredagslåt! <br>Vinnare vecka " + weekNumber() + ", med <b>" + winners[0].likes + vote
+                    mailMessage = "<br>Vinnare vecka " + weekNumber() + ", med <b>" + winners[0].likes + vote
 
                     winners.forEach(function (winner) {
                         mailMessage += "<br><b>" + winner.display_name + `</b> med låt: <a href="https://open.spotify.com/track/${winner.trackId}">"` + winner.songName + '"</a> av ' + winner.artist;
