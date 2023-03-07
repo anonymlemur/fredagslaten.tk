@@ -526,7 +526,7 @@ app.post("/update_playlist", function (req, res) {
                     mailMessage = "<br>Vinnare vecka " + weekNumber() + ", med <b>" + winners[0].likes + vote
 
                     winners.forEach(function (winner) {
-                        mailMessage += "<br><b>" + winner.display_name + `</b> med låt: <a href="https://open.spotify.com/track/${winner.trackId}">"` + winner.songName + '"</a> av ' + winner.artist;
+                        mailMessage += "<br><b>" + winner.display_name + `</b> med låt: <a href="https://open.spotify.com/track/${winner.id}">"` + winner.songName + '"</a> av ' + winner.artist;
                     }
                     );
                     mailMessage += '<br><br>Lyssna på alla fredagslåtar här:   <a href="https://open.spotify.com/playlist/6CiGXt6v60opLz0v45JI5i">Fredagslåten 2 Electric boogaloo</a> <br><br>Glöm inte att lägga till och rösta på nästa veckas låtar!';
@@ -535,7 +535,7 @@ app.post("/update_playlist", function (req, res) {
                         headers: { 'Content-Type': 'application/json' },
                         json: true,
                         body: {
-                            email: "Jcarlsson1996@gmail.com, aronsson.o@gmail.com, adrianknuutinen@gmail.com, linusri@kth.se, Lukas.elfving@gmail.com, frej.back@gmail.com, j.jagestedt@gmail.com",
+                            email: "Edmolander97@gmail.com, Jcarlsson1996@gmail.com, aronsson.o@gmail.com, adrianknuutinen@gmail.com, linusri@kth.se, Lukas.elfving@gmail.com, frej.back@gmail.com, j.jagestedt@gmail.com",
                             //email: "j.jagestedt@gmail.com",
                             subject: "Fredagslåten vecka " + weekNumber(),
                             message: mailMessage
