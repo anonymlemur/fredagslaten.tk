@@ -34,7 +34,7 @@ const tzDiff = (first, second) => (first.getTimezoneOffset() - second.getTimezon
 
 
 
-const { readFile, writeFile } = require("fs");
+const { readFile, writeFile, readdir, readdirSync } = require("fs");
 
 var redirect_uri = "https://fredagslaten.tk/callback";
 
@@ -64,6 +64,7 @@ app.use(express.static(__dirname + "/public"))
     .use(cors())
     .use(cookieParser())
     .use(express.json());
+
 
 app.get("/login", function (req, res) {
     var state = generateRandomString(16);
@@ -97,6 +98,7 @@ app.post("/email", function (req, res) {
     });
 
 });
+
 
 app.get("/callback", function (req, res) {
     var code = req.query.code || null;
@@ -305,10 +307,152 @@ app.post("/get_tracks", async function (req, res) {
         songsSubmitted == 7 || ((new Date().getDay() == 5 || new Date().getDay() == 4) && weekNumber() == week) ? track.canView = true : false;
     });
 
+    let weeks = [];
+    readdir("./backup", (err, files) => {
+        if (err) {
+            console.log(err);
+            return res.send({ items: exportTracks });
+        }
+        else {
+            files.forEach(file => {
+                if (file.startsWith("appDataWeek") && file.endsWith(".json")) {
+                    let week;
+                    week = file.match(/\d+/);
 
-    return res.send({ items: exportTracks });
+                    if (week != null) {
+                        week = { "weekNumber": week[0] };
+                        weeks.push(week);
+                    }
+
+                }
+            })
+            return res.send({ items: exportTracks, backup: weeks });
+        };
+    });
+
+
+
 
 });
+
+
+
+app.post("/get_old_tracks", async function (req, res) {
+    function weekNumber(date = new Date()) {
+        const day = (date.getDay() + 6) % 7
+        const thursday = new Date(date)
+        thursday.setDate(date.getDate() - day + 3)
+        const firstThursday = new Date(thursday.getFullYear(), 0, 1)
+        if (firstThursday.getDay() !== 4) {
+            firstThursday.setMonth(0, 1 + (11 /* 4 + 7 */ - firstThursday.getDay()) % 7)
+        }
+        const weekNumber = 1 + Math.floor((thursday - firstThursday + tzDiff(firstThursday, thursday)) / WEEK)
+        return weekNumber
+    }
+    let songsSubmitted = 0;
+    let canVote = false;
+    let canView = false;
+    let db = new JsonDB(new Config(`backup/appDataWeek${req.body.weekNumber}`, true, true, '/'));
+
+    let snapshot = await db.getData("/submitted-songs").then();
+    let snapshotLikes = await db.getData("/votes").then();
+    let week = await db.getData("/date/week").then();
+    let allLikes = [];
+    for (let obj in snapshotLikes) {
+        allLikes.push(snapshotLikes[obj]);
+    };
+    let allTracks = [];
+    let exportTracks = [];
+    for (let obj in snapshot) {
+        allTracks.push(snapshot[obj]);
+    };
+    let text = "Lägg till låt"
+    allTracks.forEach(function (track) {
+        let totalLikes = 0;
+        let users = [];
+        let display_name = track.display_name;
+        track.canView = false;
+        if (snapshotLikes[track.userId]) {
+            let display_name = snapshotLikes[track.userId].displayName;
+        }
+        text = "Lägg till låt"
+
+        //var who= "";
+        allLikes.forEach(function (like) {
+            if (like.trackId == track.trackId) {
+                totalLikes++;
+
+                //who = like.who;
+                users.push(like.userId);
+                //addedBy = like.userId;
+            }
+        });
+        track.colorValue = Math.floor(Math.random() * 360);
+        track.oppositeColorValue = (track.colorValue + 180) % 360
+        track.likes = totalLikes;
+        track.users = users;
+        track.addedBy = track.userId;
+        track.display_name = display_name;
+
+        if (track.trackId && (track.trackId != "" || track.trackId != null)) {
+
+            songsSubmitted++;
+            text = "Ändra låt"
+        }
+
+        track.text = text;
+        // if (((new Date().getDay() == 4 || new Date().getDay() == 5) && (track.trackId == null || track.trackId == "")) || (new Date().getDay() != 4 && new Date().getDay() != 5)) {
+        //     track.canSubmit = true;
+        // }
+        if (weekNumber() == week) {
+            track.canSubmit = true;
+        }
+        // if (new Date().getDay() == 5 && weekNumber() == week) {
+        //     track.canView = true;
+
+        // }
+        exportTracks.push(track);
+
+    });
+    // if (songsSubmitted == 7 || ((new Date().getDay() == 5 || new Date().getDay() == 4) && weekNumber() == week)) {
+    //     if (songsSubmitted == 7 || new Date().getDay() == 5) {
+    //         canVote = true;
+    //     }
+    //     canView = true;
+    // }
+
+    allTracks.forEach(function (track) {
+        songsSubmitted == 7 || (new Date().getDay() == 5 && weekNumber() == week) ? track.canVote = true : false;
+        songsSubmitted == 7 || ((new Date().getDay() == 5 || new Date().getDay() == 4) && weekNumber() == week) ? track.canView = true : false;
+    });
+
+
+    let weeks = [];
+    readdir("./backup", (err, files) => {
+        if (err) {
+            console.log(err);
+            return res.send({ items: exportTracks });
+        }
+        else {
+            files.forEach(file => {
+                if (file.startsWith("appDataWeek") && file.endsWith(".json")) {
+                    let week;
+                    week = file.match(/\d+/);
+
+                    if (week != null) {
+                        week = { "weekNumber": week[0] };
+                        weeks.push(week);
+                    }
+
+                }
+            })
+            return res.send({ items: exportTracks, backup: weeks });
+        };
+    });
+
+
+});
+
 
 app.post("/add_song", function (req, res) {
     let db = new JsonDB(new Config("appData", true, true, '/'));
@@ -602,7 +746,44 @@ app.post("/get_likes", async function (req, res) {
 
     return res.send({ items: exportTracks });
 });
+app.post("/get_old_likes", async function (req, res) {
 
+    let db = new JsonDB(new Config(`backup/appDataWeek${req.body.weekNumber}`, true, true, '/'));
+    let snapshot = await db.getData("/submitted-songs");
+    let snapshotLikes = await db.getData("/votes");
+    let allLikes = [];
+    for (let obj in snapshotLikes) {
+        allLikes.push(snapshotLikes[obj]);
+    };
+    let allTracks = [];
+    let exportTracks = [];
+    for (let obj in snapshot) {
+        allTracks.push(snapshot[obj]);
+    };
+
+    allTracks.forEach(function (track) {
+        let totalLikes = 0;
+        let users = [];
+        let displayNames = [];
+
+        allLikes.forEach(function (like) {
+            if (like.trackId == track.trackId) {
+                totalLikes++;
+                displayNames.push(like.displayName);
+                users.push(like.userId);
+            }
+        });
+        track.likes = totalLikes;
+        track.users = users;
+        track.displayNames = displayNames;
+        track.addedBy = track.userId;
+        exportTracks.push(track);
+
+    });
+
+
+    return res.send({ items: exportTracks });
+});
 
 
 console.log("Listening on " + port);

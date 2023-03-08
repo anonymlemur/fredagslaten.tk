@@ -282,12 +282,14 @@ body {
 }
 
 body {
-  background: #F9C5D1;
-  background: linear-gradient(45deg, #F9C5D1, #9795EF);
+  /* background: #F9C5D1; */
+  /* background: linear-gradient(45deg, #F9C5D1, #9795EF); */
+  background: transparent;
+
 }
 
 html {
-  background: #9795EF;
+  background: linear-gradient(45deg, #F9C5D1, #9795EF) no-repeat center center fixed;
 
 }
 
@@ -346,6 +348,7 @@ button {
 .webflow-style-input input::-webkit-input-placeholder {
   color: #7881a1;
 }
+
 .webflow-style-input p {
   color: #7881a1;
 }
@@ -367,15 +370,86 @@ button {
   min-width: 0px;
   width: fit-content;
 }
+
 .add-song {
 
   min-width: 0px;
   width: fit-content;
   justify-content: center;
 }
+
 .remove {
 
   min-width: 0px;
   width: fit-content;
   margin-left: 5px;
+}
+
+.dropbtn {
+  background-color: #3a836e;
+  color: white;
+  padding: 16px;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  font-weight: bold;
+font-family: revert;
+}
+
+.dropbtn:hover,
+.dropbtn:focus {
+  background-color: #347663;
+}
+
+#dropdown {
+  position: fixed;
+  display: inline-block;
+  top: 5px;
+  right: 5px;
+}
+
+.dropdown-content {
+  display: none;
+  background-color: #f1f1f16e;
+  overflow: auto;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+}
+
+.weekHeader{
+  text-align: center;
+  display: block;
+  width: 331px;
+  min-width: none;
+  padding-top: 2rem;
+}
+
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown a:hover {
+  background-color: #ddd;
+}
+
+.show {
+  display: block;
+}
+.logout {
+  position: fixed;
+  display: inline-block;
+  top: 5px;
+  left: 5px;
+}
+@media only screen and (max-width: 600px) {
+  .logout {
+    visibility: hidden;
+  }
+  #dropdown {
+    visibility: hidden;
+  }
 }
