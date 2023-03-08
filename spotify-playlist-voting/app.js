@@ -34,7 +34,7 @@ const tzDiff = (first, second) => (first.getTimezoneOffset() - second.getTimezon
 
 
 
-const { readFile, writeFile, readdir, readdirSync } = require("fs");
+const { readFile, writeFile, readdir } = require("fs");
 
 var redirect_uri = "https://fredagslaten.tk/callback";
 
