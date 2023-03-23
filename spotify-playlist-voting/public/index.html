@@ -63,14 +63,17 @@
 
 
       <div id="selected-playlist-container">
-        <button type="button" class="logout dropbtn knapp" style="display: none;">Logga ut</button>
-        <div id="dropdown" class="knapp" style="display: none;">
-          <button onmouseout="nohoover()" onmouseover="hoover()" class="dropbtn">Alla Veckor</button>
-          <div id="backups" onmouseout="nohoover()" onmouseover="hoover()" class="dropdown-content">
-          </div>
-        </div>
+
         <div class="wrapper">
 
+        </div>
+        <button type="button" class="logout dropbtn knapp" style="display: none;"><i
+            class="fa-regular fa-right-from-bracket"></i></button>
+        <div id="dropdown" class="knapp" style="display: none;">
+          <button onmouseout="nohoover()" onmouseover="hoover()" class="dropbtn"><i
+              class="fa-regular fa-calendar"></i></button>
+          <div id="backups" onmouseout="nohoover()" onmouseover="hoover()" class="dropdown-content">
+          </div>
         </div>
         <div id="selected-playlist-tracks" class="rows">
 
@@ -112,10 +115,23 @@
       {{#if trackId}}
       <div class="song box" id="song-{{index}}">
         <div class="thumbnail" id="{{addedBy}}">
-          {{!-- <h2 class="added-by">{{display_name}}</h2> --}}
+          {{#if old}}
+          <h2 class="added-by">{{display_name}}</h2>
+          {{/if}}
           <iframe style="border-radius:5px; " src="https://open.spotify.com/embed/track/{{trackId}}" width="300px"
             height="352" frameBorder="0" allowfullscreen="" id="song-{{trackId}}-{{addedBy}}"
             allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+          {{#if old}}
+          <div class="caption">
+            </p>Antal röster: <span id="likes-{{trackId}}-{{addedBy}}"></span>
+          </div>
+          {{#if users}}
+          <div class="deadspace-votes"></div>
+          {{else}}
+          <div class="deadspace-novote"></div>
+          {{/if}}
+          
+          {{else}}
           {{#if canVote}}
           <div class="caption">
             <a href="#" id="{{trackId}}" class="btn-like btn btn-default">
@@ -126,6 +142,7 @@
           {{!-- {{else}}
           <div class="deadspace-iframe">
           </div> --}}
+          {{/if}}
           {{/if}}
         </div>
       </div>
@@ -155,6 +172,7 @@
     </script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.4.2/handlebars.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/seedrandom/3.0.5/seedrandom.min.js"></script>
     <script>
       function hoover() {
         document.getElementById("backups").classList.add("show");

@@ -8,6 +8,8 @@ var querystring = require("querystring");
 var cookieParser = require("cookie-parser");
 var nodemailer = require("nodemailer");
 var HTMLParser = require('node-html-parser');
+var seedrandom = require('seedrandom');
+
 
 let appData = require("./appData.json");
 let spotifyApiDetails = require("./spotifyApiDetails.json");
@@ -230,6 +232,14 @@ app.post("/get_tracks", async function (req, res) {
         const weekNumber = 1 + Math.floor((thursday - firstThursday + tzDiff(firstThursday, thursday)) / WEEK)
         return weekNumber
     }
+    function shuffleArrayWithSeed(arr, seed) {
+        const rng = seedrandom(seed);
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(rng() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
     let songsSubmitted = 0;
     let canVote = false;
     let canView = false;
@@ -257,15 +267,10 @@ app.post("/get_tracks", async function (req, res) {
             let display_name = snapshotLikes[track.userId].displayName;
         }
         text = "Lägg till låt"
-
-        //var who= "";
         allLikes.forEach(function (like) {
             if (like.trackId == track.trackId) {
                 totalLikes++;
-
-                //who = like.who;
                 users.push(like.userId);
-                //addedBy = like.userId;
             }
         });
         track.colorValue = Math.floor(Math.random() * 360);
@@ -282,19 +287,14 @@ app.post("/get_tracks", async function (req, res) {
         }
 
         track.text = text;
-        // if (((new Date().getDay() == 4 || new Date().getDay() == 5) && (track.trackId == null || track.trackId == "")) || (new Date().getDay() != 4 && new Date().getDay() != 5)) {
-        //     track.canSubmit = true;
-        // }
         if (weekNumber() == week) {
             track.canSubmit = true;
         }
-        // if (new Date().getDay() == 5 && weekNumber() == week) {
-        //     track.canView = true;
-
-        // }
         exportTracks.push(track);
 
+
     });
+
     // if (songsSubmitted == 7 || ((new Date().getDay() == 5 || new Date().getDay() == 4) && weekNumber() == week)) {
     //     if (songsSubmitted == 7 || new Date().getDay() == 5) {
     //         canVote = true;
@@ -311,7 +311,7 @@ app.post("/get_tracks", async function (req, res) {
     readdir("./backup", (err, files) => {
         if (err) {
             console.log(err);
-            return res.send({ items: exportTracks });
+            return res.send({ items: shuffleArrayWithSeed(exportTracks, req.body.seed) });
         }
         else {
             files.forEach(file => {
@@ -326,7 +326,8 @@ app.post("/get_tracks", async function (req, res) {
 
                 }
             })
-            return res.send({ items: exportTracks, backup: weeks });
+            weeks.sort(function (a, b) { return parseInt(b.weekNumber) - parseInt(a.weekNumber) });
+            return res.send({ items: shuffleArrayWithSeed(exportTracks, req.body.seed), backup: weeks });
         };
     });
 
@@ -334,8 +335,6 @@ app.post("/get_tracks", async function (req, res) {
 
 
 });
-
-
 
 app.post("/get_old_tracks", async function (req, res) {
     function weekNumber(date = new Date()) {
@@ -393,6 +392,7 @@ app.post("/get_old_tracks", async function (req, res) {
         track.users = users;
         track.addedBy = track.userId;
         track.display_name = display_name;
+        track.old = true;
 
         if (track.trackId && (track.trackId != "" || track.trackId != null)) {
 
@@ -446,6 +446,7 @@ app.post("/get_old_tracks", async function (req, res) {
 
                 }
             })
+            weeks.sort(function (a, b) { return parseInt(b.weekNumber) - parseInt(a.weekNumber) });
             return res.send({ items: exportTracks, backup: weeks });
         };
     });
@@ -453,11 +454,23 @@ app.post("/get_old_tracks", async function (req, res) {
 
 });
 
-
 app.post("/add_song", function (req, res) {
     let db = new JsonDB(new Config("appData", true, true, '/'));
     let documentId = req.body.userId;
     let trackIdIn = req.body.trackId;
+    let playlistsDb = new JsonDB(new Config("playlists", true, true, '/'));
+
+    async function getPreviusTracks() {
+        let previusTrackIds = [];
+        let playlists = await playlistsDb.getData("/playlists").then();
+        playlists.forEach(function (playlist) {
+            playlist.tracks.items.forEach(function (track) {
+                previusTrackIds.push(track.track.id)
+            });
+        });
+        return previusTrackIds;
+    }
+
     let options;
     if (trackIdIn == "delete") {
         db.push("/submitted-songs/" + documentId + "/trackId", "");
@@ -494,54 +507,106 @@ app.post("/add_song", function (req, res) {
             return link;
         }
         getapi(trackIdIn).then(function (data) {
-            options = {
-                method: "GET", url: "https://api.spotify.com/v1/tracks/" + data, headers: {
-                    Authorization: "Bearer " + req.body.accessToken
-                }
-            };
-            console.log(options);
-            request(options, function (error, response, body) {
-                if (error) throw new Error(error);
-                if (response.statusCode != 200) {
-                    return res.send("Låten är inte giltig");
+            getPreviusTracks().then((result) => {
+                if (result.includes(data)) {
+                    return res.send("Låten är redan tillagd i listan");
+                } else {
+                    options = {
+                        method: "GET", url: "https://api.spotify.com/v1/tracks/" + data, headers: {
+                            Authorization: "Bearer " + req.body.accessToken
+                        }
+                    };
+                    console.log(options);
+                    request(options, function (error, response, body) {
+                        if (error) throw new Error(error);
+                        if (response.statusCode != 200) {
+                            return res.send("Låten är inte giltig");
 
-                }
-                else {
-                    db.push("/submitted-songs/" + documentId + "/trackId", trackIdIn).catch(err => {
-                        stringReturn = "User not authorized";
-                        console.log("User " + documentId + " not found",);
+                        }
+                        else {
+                            db.push("/submitted-songs/" + documentId + "/trackId", data).catch(err => {
+                                stringReturn = "User not authorized";
+                                console.log("User " + documentId + " not found",);
 
+                            });
+                            return res.send("Sång tillagd");
+                        }
                     });
-                    return res.send("Sång tillagd");
                 }
             });
         })
     }
     else {
-        options = {
-            method: "GET", url: "https://api.spotify.com/v1/tracks/" + trackIdIn, headers: {
-                Authorization: "Bearer " + req.body.accessToken
-            }
-        };
-        request(options, function (error, response, body) {
-            if (error) throw new Error(error);
-            if (response.statusCode != 200) {
-                return res.send("Låten är inte giltig");
+        getPreviusTracks().then((result) => {
+            if (result.includes(trackIdIn)) {
+                return res.send("Låten är redan tillagd i listan");
+            } else {
+                options = {
+                    method: "GET", url: "https://api.spotify.com/v1/tracks/" + trackIdIn, headers: {
+                        Authorization: "Bearer " + req.body.accessToken
+                    }
+                };
+                request(options, function (error, response, body) {
+                    if (error) throw new Error(error);
+                    if (response.statusCode != 200) {
+                        return res.send("Låten är inte giltig");
 
-            }
-            else {
-                db.push("/submitted-songs/" + documentId + "/trackId", trackIdIn).catch(err => {
-                    stringReturn = "User not authorized";
-                    console.log("User " + documentId + " not found",);
+                    }
+                    else {
+                        db.push("/submitted-songs/" + documentId + "/trackId", trackIdIn).catch(err => {
+                            stringReturn = "User not authorized";
+                            console.log("User " + documentId + " not found",);
 
+                        });
+                        return res.send("Sång tillagd");
+                    }
                 });
-                return res.send("Sång tillagd");
             }
         });
     }
 
 });
+app.get("/get_playlists", function (req, res) {
+    console.log("get_playlists");
+    let access_token = req.headers.authorization;
+    let ids = req.body.ids;
+    async function getPlaylists(id1, id2, access_token) {
+        var options1 = {
+            method: 'GET',
+            url: 'https://api.spotify.com/v1/playlists/' + id1 + '?fields=id%2Ctracks.items(track(id))',
+            headers: { 'Authorization': access_token },
+            json: true,
+        };
+        var options2 = {
+            method: 'GET',
+            url: 'https://api.spotify.com/v1/playlists/' + id2 + '?fields=id%2Ctracks.items(track(id))',
+            headers: { 'Authorization': access_token },
+            json: true,
+        };
+        let playlist1 = await doRequest(options1);
+        let playlist2 = await doRequest(options2);
+        return [playlist1, playlist2];
+    }
 
+    function doRequest(options) {
+        return new Promise((resolve, reject) => {
+            request(options, (err, res, body) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(body);
+                }
+            });
+        });
+    }
+    getPlaylists(ids[0], ids[1], access_token).then(function (data) {
+        let db = new JsonDB(new Config("playlists", true, true, '/'));
+        db.push("/playlists", data);
+        return res.send(data);
+    }
+    );
+
+});
 app.post("/update_playlist", function (req, res) {
     function weekNumber(date = new Date()) {
         const day = (date.getDay() + 6) % 7
@@ -565,8 +630,6 @@ app.post("/update_playlist", function (req, res) {
             console.log("The file was saved!");
         });
     });
-
-
     let playlistId = "6CiGXt6v60opLz0v45JI5i";
     let loserPlaylistId = "4wBuklcIoGf4ZVXRPNzQ2r";
     let client_id = spotifyApiDetails.client_id;
@@ -702,11 +765,18 @@ app.post("/update_playlist", function (req, res) {
         }
     });
 
+    request.get({
+        url: "https://fredagslaten.tk/get_playlists", headers: { 'Authorization': access_token }, json: true,
+        body: {
+            'ids': [
+                playlistId,
+                loserPlaylistId
+            ]
+        }
+    });
+
 
 });
-
-
-
 app.post("/get_likes", async function (req, res) {
     let db = new JsonDB(new Config("appData", true, true, '/'));
 
@@ -769,7 +839,12 @@ app.post("/get_old_likes", async function (req, res) {
         allLikes.forEach(function (like) {
             if (like.trackId == track.trackId) {
                 totalLikes++;
-                displayNames.push(like.displayName);
+                allTracks.map((tracks) => {
+                    if (tracks.userId == like.userId) {
+                        displayNames.push(tracks.display_name);
+                    }
+                });
+
                 users.push(like.userId);
             }
         });
