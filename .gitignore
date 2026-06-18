@@ -1,30 +1,42 @@
-spotify-playlist-voting.zip
-spotify-playlist-voting/public/js/main copy.js
-reminder_test.sh
-reminder.sh
-spotify-playlist-voting/public/css/main.css_old
-spotify-playlist-voting/public/js/main.js.save
-appData copy.json
-spotify-playlist-voting/appData copy.json
-spotify-playlist-voting/appData copy.json
-.gitignore
+# Dependencies
+node_modules/
+
+# Unused / non-app static content
+spotify-playlist-voting/public/adrian_meme/
+spotify-playlist-voting/public/friskel/
+spotify-playlist-voting/public/html1/
+
+# Secrets / credentials (never commit)
+.env
+spotify-playlist-voting/spotifyApiDetails.json
+spotify-playlist-voting/emailDetails.json
+spotify-playlist-voting/firebaseServiceAccountKey.json
+
+# Runtime data — flat-file "DB" + per-week backups.
+# Not needed in VCS; these get migrated into SQLite (see PLAN.md).
 spotify-playlist-voting/appData.json
-friskel/
-spotify-playlist-voting/public/js/main_clean.js
-package-lock.json
-firebaseServiceAccountKey.json
-spotifyApiDetails.json
-emailDetails.json
-spotify-playlist-voting.zip
-spotify-playlist-voting/public/js/main copy.js
+spotify-playlist-voting/appData.jsonOld
 spotify-playlist-voting/appData copy.json
-spotify-playlist-voting/appData.json
-spotify-playlist-voting/appData.json
-spotify-playlist-voting/ss.js
-spotify-playlist-voting/public/css/main.css.save
-spotify-playlist-voting/app.js.save
-spotify-playlist-voting/app.js_old
-spotify-playlist-voting/backup
-adrian_meme/
-old/
+spotify-playlist-voting/backup/
 spotify-playlist-voting/playlists.json
+appData copy.json
+
+# Generated SQLite database
+spotify-playlist-voting/data/*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+
+# Editor / dev leftovers
+*.save
+*_old
+*.jsonOld
+
+# Vim swap files
+*.sw[a-p]
+[._]*.sw[a-p]
+
+# MCP local memory store (machine-local, not shared)
+.mcp/
