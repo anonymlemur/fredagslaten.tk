@@ -1,162 +1,189 @@
-# Migration Plan — 100% self-hosted + SQLite
+# Plan — Fredagslåten rebuild (self-hosted, SQLite, Tinder-style UI)
 
-Goal: turn Fredagslåten into a fully self-hostable app with a **SQLite** datastore that holds
-**all past and present voting data**, keyed by **year + week** (current data is **2023**). The UI
-stays as-is for now. **No breaking changes are made by this document** — it is the roadmap. Work
-happens on branch `feat/localhost-sqlite-migration`; `main` holds the prod baseline (commit `807fda1`).
+Full rebuild of Fredagslåten into a **100% self-hosted** app: a Spotify-backed weekly vote where a
+growing group of friends swipe **like / dislike** on each other's songs and the **most-liked song
+wins**. All voting history (past + present) lives in **SQLite**, keyed by **year + week**.
 
-> Read `SPEC.md` first — it defines current behaviour and lists the quirks this plan addresses.
+This document is the roadmap. The legacy app stays in `spotify-playlist-voting/` as reference until
+decommissioned. Work happens on `feat/localhost-sqlite-migration`; `main` holds the prod baseline
+(`807fda1`). See `SPEC.md` for the legacy behaviour this replaces.
 
 ---
 
 ## 1. Goals & non-goals
 
 **Goals**
-- Replace the `node-json-db` flat-file store (`appData.json` + `backup/appDataWeek*.json`) with
-  **one SQLite database**.
-- Add a **`year`** dimension everywhere (today only `week` exists; all existing data = year **2023**).
-- Make the app **self-contained**: no calls to `https://fredagslaten.tk`, no external SaaS, secrets
-  via env/config, runnable on localhost/LAN with one command.
-- Preserve **all historical weeks** (the 12 `appDataWeek*.json` snapshots) in the DB.
+- **Full rebuild** on a modern stack (see §2). Legacy Express + `node-json-db` is reference-only.
+- **SQLite** datastore for ALL voting, **year + week** keyed (legacy data = year **2023**, week-only).
+- **Tinder-style UI**: one card at a time, swipe/click **like vs. dislike**; **most likes wins**.
+- **Adaptable / growing**: dynamic membership (invites), **nothing hardcoded** — no fixed roster, no
+  magic vote thresholds (legacy hardcodes 8 users + "7").
+- **Self-contained**: no `fredagslaten.tk` calls, no Firebase, no SaaS; config via `.env`.
+- **Docker** for one-command run (local dev now; deployable later).
 
-**Non-goals (for now)**
-- No UI redesign (keep `public/` as-is; only repoint endpoints if needed).
-- No auth overhaul (keep Spotify OAuth).
-- No multi-tenancy.
+**Non-goals (now)**
+- Public multi-group SaaS, mobile apps, real-time presence. Keep it single-group, single-instance.
 
-## 2. Framework & library choices
+## 2. Target stack (framework choice)
 
-| Concern        | Choice | Why |
-|----------------|--------|-----|
-| Runtime/server | **Keep Node + Express** | Already there; smallest blast radius. (Express 4 is in deps.) |
-| DB driver      | **`better-sqlite3`** | Synchronous, fast, simple, well-maintained; ideal for a single-process self-hosted app. Avoids callback spaghetti. (Alt: Node 22's built-in `node:sqlite`, still experimental.) |
-| Migrations     | **Plain SQL files** run by a tiny runner (or `better-sqlite3` `exec`) | No heavy ORM needed for this scale. |
-| Config         | **`dotenv` + `.env`** | Move secrets out of `spotifyApiDetails.json`/`emailDetails.json`; one config surface. |
-| Email          | **Keep `nodemailer`** (self-hosted SMTP) | Already used. Drop `mailtrap`. |
-| Process mgmt   | `node app.js` (dev) → optional `pm2`/Windows service (later) | Out of scope for first pass. |
+Chosen by "use whatever you know best", optimised for a lean self-hosted single instance with a
+swipe UI:
 
-Remove still-unused deps along the way: `collect.js`, `mathjs`, `mailtrap` (see `REMOVED.md`).
+| Concern   | Choice | Why |
+|-----------|--------|-----|
+| Framework | **SvelteKit (Svelte 5)** | One process = SSR UI **and** API routes; tiny runtime; first-class transitions for the swipe deck. |
+| DB        | **better-sqlite3** | Synchronous, fast, zero-config; perfect for a single-instance self-hosted app. |
+| Styling   | **Tailwind CSS** | Fast, consistent, themeable (dark/light) for the new UI. |
+| Auth      | **Spotify OAuth (Authorization Code)** handled server-side; session cookie. |
+| Config    | **`.env`** via SvelteKit `$env` | One config surface; secrets out of source. |
+| Container | **Docker + docker-compose** | Reproducible run; volume-mount the SQLite file + `.env`. |
+| Migration | **Node script** (`scripts/migrate-legacy.js`) using better-sqlite3 |
 
-## 3. Target SQLite schema
+App lives in a new dir (proposed `app/`); legacy untouched until Phase 6.
+
+## 3. Architecture
+
+```
+app/                         # SvelteKit project
+  src/routes/
+    +page.svelte             # the swipe deck (vote on this week's songs)
+    submit/+page.svelte      # add/replace your song
+    history/+page.svelte     # past weeks (by year+week)
+    admin/+page.svelte       # roster, invites, close week, settings
+    auth/spotify/+server.ts        # OAuth start
+    auth/spotify/callback/+server  # OAuth callback → session
+    api/songs/+server.ts           # GET week songs / POST submit
+    api/votes/+server.ts           # POST like|dislike (one per song per user)
+    api/weeks/+server.ts           # current week, close week, history
+    api/members/+server.ts         # list/invite/approve members
+  src/lib/server/db.ts       # better-sqlite3 connection + queries
+  src/lib/server/spotify.ts  # token mgmt + Web API helpers
+  data/fredagslaten.db       # SQLite (gitignored)
+  db/schema.sql              # schema + indexes
+  scripts/migrate-legacy.js  # JSON → SQLite (year=2023)
+Dockerfile  docker-compose.yml  .env.example
+```
+
+Server-side holds Spotify tokens (no tokens in the URL hash like legacy). API routes enforce
+membership and week phase.
+
+## 4. Data model (SQLite, year-aware, dynamic)
 
 ```sql
--- A round = one (year, week). status drives the submit/vote/closed phases.
+CREATE TABLE settings (              -- adaptable config, no hardcoding
+  key TEXT PRIMARY KEY, value TEXT
+);  -- e.g. songs_per_user=1, vote_open_day=5 (Fri), tz, playlist ids
+
+CREATE TABLE users (
+  id           TEXT PRIMARY KEY,     -- Spotify user id
+  display_name TEXT NOT NULL,
+  role         TEXT NOT NULL DEFAULT 'member',   -- 'member' | 'admin'
+  status       TEXT NOT NULL DEFAULT 'active',   -- 'invited' | 'active' | 'removed'
+  joined_at    TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE invites (               -- growing roster
+  email TEXT PRIMARY KEY, invited_by TEXT, created_at TEXT DEFAULT (datetime('now'))
+);
+
 CREATE TABLE weeks (
-  id         INTEGER PRIMARY KEY AUTOINCREMENT,
-  year       INTEGER NOT NULL,
-  week_no    INTEGER NOT NULL,
-  status     TEXT NOT NULL DEFAULT 'open',     -- 'open' | 'voting' | 'closed'
-  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  year INTEGER NOT NULL, week_no INTEGER NOT NULL,
+  status TEXT NOT NULL DEFAULT 'open',   -- 'open' | 'voting' | 'closed'
   UNIQUE (year, week_no)
 );
 
-CREATE TABLE users (
-  id           TEXT PRIMARY KEY,               -- Spotify user id
-  display_name TEXT NOT NULL
-);
-
--- One submission slot per user per week.
 CREATE TABLE submissions (
-  id        INTEGER PRIMARY KEY AUTOINCREMENT,
-  week_id   INTEGER NOT NULL REFERENCES weeks(id) ON DELETE CASCADE,
-  user_id   TEXT    NOT NULL REFERENCES users(id),
-  track_id  TEXT,                              -- Spotify track id, NULL/'' = not submitted
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  week_id INTEGER NOT NULL REFERENCES weeks(id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL REFERENCES users(id),
+  track_id TEXT,
   UNIQUE (week_id, user_id)
 );
 
--- One vote per voter per week (matches current behaviour: a single like that can move/toggle).
-CREATE TABLE votes (
-  id           INTEGER PRIMARY KEY AUTOINCREMENT,
-  week_id      INTEGER NOT NULL REFERENCES weeks(id) ON DELETE CASCADE,
-  voter_id     TEXT    NOT NULL REFERENCES users(id),
-  track_id     TEXT    NOT NULL,               -- the liked track
-  submitter_id TEXT    REFERENCES users(id),   -- "who" submitted it
-  is_like      INTEGER NOT NULL DEFAULT 1,
-  created_at   TEXT,                            -- from existing `timestamp`
-  UNIQUE (week_id, voter_id)
+CREATE TABLE votes (                  -- Tinder: like/dislike, one vote per user per SONG
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  week_id INTEGER NOT NULL REFERENCES weeks(id) ON DELETE CASCADE,
+  voter_id TEXT NOT NULL REFERENCES users(id),
+  track_id TEXT NOT NULL,
+  submitter_id TEXT REFERENCES users(id),
+  is_like INTEGER NOT NULL,           -- 1 like / 0 dislike
+  created_at TEXT DEFAULT (datetime('now')),
+  UNIQUE (week_id, voter_id, track_id)
 );
 
--- Resolved winner(s) per week (supports ties → multiple rows).
 CREATE TABLE winners (
-  week_id   INTEGER NOT NULL REFERENCES weeks(id) ON DELETE CASCADE,
-  track_id  TEXT NOT NULL,
-  likes     INTEGER NOT NULL,
+  week_id INTEGER NOT NULL REFERENCES weeks(id) ON DELETE CASCADE,
+  track_id TEXT NOT NULL, likes INTEGER NOT NULL, dislikes INTEGER NOT NULL,
   PRIMARY KEY (week_id, track_id)
 );
-
-CREATE INDEX idx_submissions_week ON submissions(week_id);
-CREATE INDEX idx_votes_week ON votes(week_id);
 ```
 
-Notes:
-- `year` lives on `weeks`; every other table joins through `week_id`, so the whole model is
-  year-aware automatically.
-- The current JSON `votes` object is keyed by voter → maps cleanly to `votes.UNIQUE(week_id, voter_id)`.
+> **Voting model change vs legacy:** legacy stored a single "like" per voter per week. Tinder-style
+> means **one like/dislike per voter per song** (`UNIQUE(week_id, voter_id, track_id)`). **Winner =
+> most likes** (tie-break: fewest dislikes, then earliest submission). Adaptability comes from
+> `settings` + DB-driven roster — no hardcoded user list or quorum.
 
-## 4. Data migration (JSON → SQLite)
+## 5. UX — the week lifecycle & swipe deck
 
-A one-off, **idempotent** script `scripts/migrate-json-to-sqlite.js`:
-1. Create the DB + schema (`spotify-playlist-voting/data/fredagslaten.db`) if absent.
-2. Seed `users` from the union of all `submitted-songs` across `appData.json` + every
-   `backup/appDataWeek*.json` (id → display_name).
-3. For each source file:
-   - Derive `week_no` from `date.week` (or the `N` in the filename); set **`year = 2023`** for all
-     existing data (override via `--year` flag for future imports).
-   - Upsert a `weeks` row; insert `submissions` and `votes`.
-   - For archived weeks, compute and store `winners` (max-likes, ties allowed) so history is queryable.
-4. Print a summary (weeks, users, submissions, votes migrated) and leave the JSON files untouched.
+- **Submit phase** (`status=open`): each active member adds one song (config `songs_per_user`).
+- **Voting phase** (`status=voting`, e.g. Friday or when all submitted): the **deck** shows one song
+  card (Spotify embed); swipe right/tap ♥ = like, swipe left/tap ✕ = dislike; card animates out, next
+  appears. You can't vote your own song. Progress "n / total".
+- **Result** (`status=closed`): winner(s) by most likes; optional Spotify playlist update + email.
+- **History**: browse by **year → week**, see each week's songs, like/dislike tallies, and winner.
 
-**Verification:** a `scripts/verify-migration.js` that re-derives per-week like tallies from SQLite
-and diffs them against the JSON source; must be zero-diff before the backend switches over.
+## 6. Legacy data migration (JSON → SQLite, 2023)
 
-## 5. Self-host hardening (the prod-URL problem)
+`scripts/migrate-legacy.js` (idempotent): seed `users` from all legacy `submitted-songs`; for
+`appData.json` + each `backup/appDataWeek*.json`, upsert a `weeks` row with **year=2023** and the
+file's week number, then insert `submissions` and `votes` (legacy single-like → `is_like=1`).
+Compute `winners` per archived week. A `verify-legacy.js` diffs per-week tallies SQLite-vs-JSON
+(must be zero-diff). Legacy JSON stays on disk (gitignored) as the safety net.
 
-`/update_playlist` currently calls `https://fredagslaten.tk/{get_likes,email,get_playlists}` and the
-`redirect_uri` is port-coupled (see SPEC §10). Plan:
-- Introduce `BASE_URL`, `PORT`, `HOST`, `SPOTIFY_REDIRECT_URI`, playlist IDs, and SMTP settings in
-  `.env`; replace the hard-coded `fredagslaten.tk` URLs with `BASE_URL` (or call the functions
-  directly instead of HTTP round-tripping to self).
-- Default `BASE_URL=http://127.0.0.1:<PORT>`; document the Spotify dashboard redirect-URI requirement
-  (loopback `127.0.0.1` only for plain http).
+## 7. Adaptability (built in, not bolted on)
 
-## 6. Phased, non-breaking steps
+- Roster from `users`/`invites` tables — invite by email in admin; new Spotify logins land as
+  `invited`/pending until an admin approves.
+- All tunables in `settings` (songs per user, voting-open rule, timezone, playlist ids, base url).
+- No magic numbers; "all submitted" is computed from active members, not a constant.
 
-Each phase is independently committable and leaves the app runnable.
+## 8. Docker & deployment
 
-- **Phase 0 — Baseline & tooling (DONE)**
-  - Prod committed on `main`; this branch created; `.gitignore`, docs, MCP config in place.
-- **Phase 1 — DB scaffolding (additive)**
-  - Add `better-sqlite3`; add `db/schema.sql`; add the migration + verify scripts. App still runs on JSON.
-- **Phase 2 — Migrate data**
-  - Run migration into `data/fredagslaten.db`; run verify; eyeball with the SQLite MCP. JSON remains the source of truth until Phase 3.
-- **Phase 3 — Swap read paths**
-  - Reimplement `get_tracks`/`get_old_tracks`/`get_likes`/`get_old_likes` against SQLite behind a
-    `DATA_BACKEND` flag (`json|sqlite`); compare outputs; flip default to `sqlite`.
-- **Phase 4 — Swap write paths**
-  - Move `add_song`, `vote`, and `update_playlist` to SQLite; replace per-week JSON backup with DB rows.
-- **Phase 5 — Self-host hardening**
-  - `.env` config; remove `fredagslaten.tk` URLs; fix the `npm start` script (`node app.js`).
-- **Phase 6 — Cleanup**
-  - Remove `node-json-db` and unused deps; delete dead files (`app.js_old`, `ss.js`,
-    `appData*.jsonOld`, etc.) in dev **and** prod (track in `REMOVED.md`).
-- **Phase 7 — UI (later)**
-  - Optional: vendor CDN assets for offline use; polish.
+- **`Dockerfile`** — multi-stage: build SvelteKit (`adapter-node`), run the Node server.
+- **`docker-compose.yml`** — one service; volume-mount `./data` (SQLite) and `.env`; map the port.
+- `.env.example` documents: `PORT`, `ORIGIN`/`BASE_URL`, `SPOTIFY_CLIENT_ID/SECRET/REDIRECT_URI`,
+  SMTP, playlist ids. Local dev: `npm run dev`; container: `docker compose up`.
+- Spotify redirect URI must match the dashboard; loopback `127.0.0.1` for local http
+  (see [[spotify-login-use-loopback-ip]] — LAN/remote needs HTTPS or a tunnel).
 
-## 7. Risks & rollback
+## 9. Phased roadmap (each phase independently runnable & committable)
 
-- **Data loss** — JSON files are the safety net through Phase 4 (kept on disk, gitignored). The DB is
-  regenerable from them via the migration script. Take a copy of `data/*.db` before destructive steps.
-- **Behaviour drift** — the verify script + `DATA_BACKEND` flag let us diff JSON vs SQLite before flipping.
-- **Spotify login on LAN** — unchanged limitation (http allowed only for `127.0.0.1`); document, don't fight.
-- **Rollback** — every phase is its own commit on this branch; `git revert`/branch reset restores the
-  prior runnable state. `main` always holds the known-good prod baseline.
+- **Phase 0 — Foundations (DONE):** prod baseline on `main`; branch; `.gitignore`/docs/MCP; memory palace.
+- **Phase 1 — Scaffold:** `app/` SvelteKit + Tailwind + better-sqlite3; `db/schema.sql`; health route. App boots, empty DB.
+- **Phase 2 — Migrate legacy data:** migration + verify scripts; load 2023 weeks into SQLite; inspect via the SQLite MCP.
+- **Phase 3 — Auth + read APIs:** server-side Spotify OAuth + session; `GET` current week / songs / history from SQLite.
+- **Phase 4 — Voting + submit (Tinder UI):** swipe deck, like/dislike, submit/replace song; winner calc.
+- **Phase 5 — Admin + adaptability:** roster/invites/approval, `settings`, close-week (playlist update + email), no hardcoding.
+- **Phase 6 — Docker:** Dockerfile + compose + `.env.example`; one-command run.
+- **Phase 7 — Cutover & cleanup:** make `app/` the entrypoint; remove legacy `spotify-playlist-voting/` and unused deps (log in `REMOVED.md`).
+- **Phase 8 — Polish (later):** theming, animations, vendor any CDN assets for offline.
 
-## 8. Tooling (MCP) — see `.mcp.json`
+## 10. Risks & rollback
 
-- **`memory`** (`@modelcontextprotocol/server-memory`) — the "memory palace": a local knowledge-graph
-  store (`.mcp/memory.json`, gitignored) to persist migration decisions/notes across sessions.
-- **`sqlite`** (`uvx mcp-server-sqlite` → `data/fredagslaten.db`) — inspect/query the migrated DB
-  directly while building Phases 2–4.
+- **Data**: legacy JSON kept on disk through Phase 7; DB regenerable via migration; back up `data/*.db`
+  before destructive steps.
+- **Behaviour drift**: verify script diffs SQLite vs JSON before trusting the DB.
+- **Spotify local login**: loopback-only for http (documented).
+- **Rollback**: each phase is its own commit; `main` always holds known-good prod.
 
-> These are **project-scoped** servers. Claude Code will ask you to approve them, and they load after
-> the next session reload/approval — they are not active the instant this file is written.
+## 11. Tooling (MCP — see `.mcp.json`)
+
+- **memory** ("memory palace") — persists rebuild decisions across sessions (mirrored in the file
+  memory store until the MCP server is approved/loaded).
+- **sqlite** (`uvx mcp-server-sqlite` → `app/data/fredagslaten.db` once it exists) — inspect/query the
+  migrated DB while building Phases 2–5. *(Update `--db-path` to the new `app/data` location when the
+  SvelteKit project is scaffolded.)*
+
+> MCP servers are project-scoped; approve them and reload the session to activate — they are not live
+> the moment this file is written.
